@@ -88,6 +88,7 @@ function Get-TocInterfaceValues {
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $addonDir = Join-Path $repoRoot "RecklessTracker"
 $tocPath = Join-Path $addonDir "RecklessTracker.toc"
+$releaseTocPath = Join-Path $repoRoot "RecklessTracker.toc"
 $luaPath = Join-Path $addonDir "RecklessTracker.lua"
 $pkgmetaPath = Join-Path $repoRoot ".pkgmeta"
 $luaSource = Get-Content -LiteralPath $luaPath -Raw
@@ -151,9 +152,11 @@ Describe "RecklessTracker package isolation" {
     $pkgmetaSource | Should Match 'package-as:\s*RecklessTracker'
   }
 
-  It "maps nested addon folder into package root for TOC discovery" {
-    $pkgmetaSource | Should Match 'move-folders:'
-    $pkgmetaSource | Should Match 'RecklessTracker:\s*RecklessTracker'
+  It "includes a release toc at repo root for packager discovery" {
+    (Test-Path -LiteralPath $releaseTocPath) | Should Be $true
+    $releaseToc = Get-Content -LiteralPath $releaseTocPath -Raw
+    $releaseToc | Should Match '^##\s*Interface\s*:'
+    $releaseToc | Should Match 'RecklessTracker\\RecklessTracker\.lua'
   }
 
   It "ignores internal development files and folders from release package" {

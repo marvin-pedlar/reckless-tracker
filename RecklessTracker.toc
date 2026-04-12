@@ -5,4 +5,4 @@
 ## Version: 0.1.6
 ## SavedVariables: RecklessTrackerDB
 
-RecklessTracker.lua
+RecklessTracker\RecklessTracker.lua

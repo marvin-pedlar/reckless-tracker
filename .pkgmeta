@@ -1,9 +1,6 @@
 package-as: RecklessTracker
 manual-changelog: CHANGELOG.md
 
-move-folders:
-  RecklessTracker: RecklessTracker
-
 ignore:
   - .gitignore
   - .github
