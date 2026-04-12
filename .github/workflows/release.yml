@@ -7,18 +7,28 @@ on:
 
 jobs:
   package-and-publish:
-    if: ${{ secrets.CF_API_KEY != '' && secrets.CF_PROJECT_ID != '' }}
     runs-on: ubuntu-latest
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      CF_PROJECT_ID: ${{ secrets.CF_PROJECT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Validate CurseForge secrets
+        shell: bash
+        run: |
+          if [ -z "${CF_API_KEY}" ] || [ -z "${CF_PROJECT_ID}" ]; then
+            echo "Missing required repository secrets: CF_API_KEY and/or CF_PROJECT_ID"
+            exit 1
+          fi
+
       - name: Package and publish
         uses: BigWigsMods/packager@v2
         with:
-          args: -p ${{ secrets.CF_PROJECT_ID }}
+          args: -p ${{ env.CF_PROJECT_ID }}
         env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          CF_API_KEY: ${{ env.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
