@@ -51,11 +51,27 @@ Run tests before every deploy:
 powershell -ExecutionPolicy Bypass -File .\scripts\run-tests.ps1
 ```
 
+If your WoW install is not on `F:\`, point tests at another `.build.info` path:
+
+```powershell
+$env:RT_BUILD_INFO_PATH="D:\Games\World of Warcraft\.build.info"
+powershell -ExecutionPolicy Bypass -File .\scripts\run-tests.ps1
+```
+
 Deploy to live AddOns only through the gated script (it runs tests first and refuses deploy on failures):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\deploy-live.ps1
 ```
+
+## CI/Release Verification
+- `Verify` workflow (push/PR):
+  - Lua lint (`luacheck`)
+  - Pester tests
+  - Packager dry-run with package content policy checks
+- `Release` workflow (tag `v*`):
+  - Runs verification first
+  - Publishes to CurseForge only if verification succeeds
 
 ## In-Game Validation Checklist
 - `/reload` loads without Lua errors

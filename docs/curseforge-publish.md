@@ -14,7 +14,7 @@ git branch -M main
 git push -u origin main
 ```
 
-## 3) Configure CurseForge automatic packaging (Webhook)
+## 3) Configure CurseForge automatic packaging (Webhook, optional)
 
 - In CurseForge project page, get your project ID.
 - Create a CurseForge API token.
@@ -25,6 +25,7 @@ https://www.curseforge.com/api/projects/{projectID}/package?token={token}
 ```
 
 - Keep default webhook settings.
+- This repository primarily uses GitHub Actions-based publishing instead of webhook publishing.
 
 ## 4) Release by tag
 
@@ -39,7 +40,7 @@ git tag v0.1.1
 git push origin v0.1.1
 ```
 
-## Alternative: GitHub Actions publishing (already configured in this repo)
+## Recommended: GitHub Actions publishing (configured in this repo)
 
 - Workflow file: `.github/workflows/release.yml`
 - Set these GitHub Actions repository secrets:
@@ -53,7 +54,18 @@ gh secret set CF_PROJECT_ID -R marvin-pedlar/reckless-tracker
 
 - Then push a new tag (e.g. `v0.1.1`) and the workflow uploads automatically.
 
+## Verification gates (current pipeline)
+
+- `.github/workflows/ci.yml` (`Verify`) runs on pushes/PRs:
+  - Lua lint (`luacheck`)
+  - Pester test suite
+  - BigWigs packager dry-run (`-d`) + zip content policy checks
+- `.github/workflows/release.yml` (`Release`) runs on `v*` tags:
+  - `verify-before-publish` test job must pass first
+  - `package-and-publish` runs only after verification passes
+
 ## Notes
 
 - Packaging behavior is configured with `.pkgmeta`.
 - The repository includes extra development files, but `.pkgmeta` ignores them in the packaged artifact.
+- The `package-and-publish` job uses environment `curseforge-production`. Configure environment protection rules/reviewers in GitHub settings if you want manual approval before publish.

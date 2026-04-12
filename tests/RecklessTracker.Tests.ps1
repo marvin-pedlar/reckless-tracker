@@ -19,7 +19,8 @@ function Convert-VersionToInterface {
 
 function Get-ClientInterfaceFromBuildInfo {
   param(
-    [string]$BuildInfoPath = "F:\World of Warcraft\.build.info"
+    [Parameter(Mandatory = $true)]
+    [string]$BuildInfoPath
   )
 
   if (-not (Test-Path -LiteralPath $BuildInfoPath)) {
@@ -85,35 +86,68 @@ function Get-TocInterfaceValues {
   )
 }
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$addonDir = Join-Path $repoRoot "RecklessTracker"
-$tocPath = Join-Path $addonDir "RecklessTracker.toc"
-$releaseTocPath = Join-Path $repoRoot "RecklessTracker.toc"
-$luaPath = Join-Path $addonDir "RecklessTracker.lua"
-$pkgmetaPath = Join-Path $repoRoot ".pkgmeta"
-$luaSource = Get-Content -LiteralPath $luaPath -Raw
-$pkgmetaSource = Get-Content -LiteralPath $pkgmetaPath -Raw
-$tocInterfaces = [string[]](Get-TocInterfaceValues -TocPath $tocPath)
-$clientInterface = Get-ClientInterfaceFromBuildInfo
+function Initialize-TestContext {
+  $initializedVar = Get-Variable -Name testContextInitialized -Scope Script -ErrorAction SilentlyContinue
+  if ($initializedVar -and $initializedVar.Value) {
+    return
+  }
+
+  $script:repoRoot = Split-Path -Parent $PSScriptRoot
+  $script:addonDir = Join-Path $script:repoRoot "RecklessTracker"
+  $script:tocPath = Join-Path $script:addonDir "RecklessTracker.toc"
+  $script:releaseTocPath = Join-Path $script:repoRoot "RecklessTracker.toc"
+  $script:luaPath = Join-Path $script:addonDir "RecklessTracker.lua"
+  $script:pkgmetaPath = Join-Path $script:repoRoot ".pkgmeta"
+
+  $script:luaSource = Get-Content -LiteralPath $script:luaPath -Raw
+  $script:pkgmetaSource = Get-Content -LiteralPath $script:pkgmetaPath -Raw
+  $script:tocInterfaces = [string[]](Get-TocInterfaceValues -TocPath $script:tocPath)
+
+  $localBuildInfoPath = "F:\World of Warcraft\.build.info"
+  $fixtureBuildInfoPath = Join-Path $PSScriptRoot "fixtures\build.info"
+
+  if ($env:RT_BUILD_INFO_PATH -and (Test-Path -LiteralPath $env:RT_BUILD_INFO_PATH)) {
+    $script:buildInfoPath = $env:RT_BUILD_INFO_PATH
+  } elseif (Test-Path -LiteralPath $localBuildInfoPath) {
+    $script:buildInfoPath = $localBuildInfoPath
+  } else {
+    $script:buildInfoPath = $fixtureBuildInfoPath
+  }
+
+  $script:clientInterface = Get-ClientInterfaceFromBuildInfo -BuildInfoPath $script:buildInfoPath
+  $script:testContextInitialized = $true
+}
 
 Describe "RecklessTracker TOC compatibility" {
+  BeforeAll {
+    Initialize-TestContext
+  }
+
+  It "has a usable build info source path" {
+    (Test-Path -LiteralPath $script:buildInfoPath) | Should Be $true
+  }
+
   It "includes the active client interface number from .build.info" {
-    (@($tocInterfaces) -contains $clientInterface) | Should Be $true
+    (@($script:tocInterfaces) -contains $script:clientInterface) | Should Be $true
   }
 
   It "contains at least one numeric interface value" {
-    $tocInterfaces.Count | Should BeGreaterThan 0
+    $script:tocInterfaces.Count | Should BeGreaterThan 0
   }
 }
 
 Describe "RecklessTracker startup hardening" {
+  BeforeAll {
+    Initialize-TestContext
+  }
+
   It "registers /rt slash commands" {
-    $luaSource | Should Match 'SLASH_RECKLESSTRACKER1\s*=\s*"/rt"'
-    $luaSource | Should Match 'SlashCmdList\.RECKLESSTRACKER\s*=\s*function'
+    $script:luaSource | Should Match 'SLASH_RECKLESSTRACKER1\s*=\s*"/rt"'
+    $script:luaSource | Should Match 'SlashCmdList\.RECKLESSTRACKER\s*=\s*function'
   }
 
   It "registers slash commands before settings init in Initialize" {
-    $match = [regex]::Match($luaSource, 'local function Initialize\(\)([\s\S]*?)\nend')
+    $match = [regex]::Match($script:luaSource, 'local function Initialize\(\)([\s\S]*?)\nend')
     $match.Success | Should Be $true
     $body = $match.Groups[1].Value
     $slashIndex = $body.IndexOf("RegisterSlashCommands()")
@@ -124,19 +158,19 @@ Describe "RecklessTracker startup hardening" {
   }
 
   It "protects settings init with pcall so startup still completes" {
-    $luaSource | Should Match 'pcall\(RegisterSettingsPanel\)'
+    $script:luaSource | Should Match 'pcall\(RegisterSettingsPanel\)'
   }
 
   It "guards Render when ui.frame is unavailable" {
-    $luaSource | Should Match 'local function Render\(\)[\s\S]*if not ui\.frame[\s\S]*return'
+    $script:luaSource | Should Match 'local function Render\(\)[\s\S]*if not ui\.frame[\s\S]*return'
   }
 
   It "protects frame creation in Initialize" {
-    $luaSource | Should Match 'pcall\(CreateTrackerFrame\)'
+    $script:luaSource | Should Match 'pcall\(CreateTrackerFrame\)'
   }
 
   It "sets statusText font before setting status text content" {
-    $match = [regex]::Match($luaSource, 'local statusText = textLayer:CreateFontString\([\s\S]*?ui\.statusText = statusText')
+    $match = [regex]::Match($script:luaSource, 'local statusText = textLayer:CreateFontString\([\s\S]*?ui\.statusText = statusText')
     $match.Success | Should Be $true
     $block = $match.Value
     $fontIndex = $block.IndexOf("statusText:SetFont(")
@@ -147,14 +181,48 @@ Describe "RecklessTracker startup hardening" {
   }
 }
 
+Describe "RecklessTracker style system" {
+  BeforeAll {
+    Initialize-TestContext
+  }
+
+  It "defines a structured style schema in defaults" {
+    $script:luaSource | Should Match 'style\s*=\s*\{'
+    $script:luaSource | Should Match 'styleProfiles\s*=\s*\{'
+    $script:luaSource | Should Match 'activeStylePreset'
+  }
+
+  It "includes style migration/version handling" {
+    $script:luaSource | Should Match 'styleVersion'
+    $script:luaSource | Should Match 'MigrateLegacyStyleSettings'
+    $script:luaSource | Should Match 'EnsureStyleSchema'
+  }
+
+  It "uses a color picker control for style colors" {
+    $script:luaSource | Should Match 'OpenColorPicker'
+    $script:luaSource | Should Match 'ColorPickerFrame'
+  }
+
+  It "exposes style presets and custom profile actions in settings" {
+    $script:luaSource | Should Match 'ApplyStylePreset'
+    $script:luaSource | Should Match 'SaveStyleProfile'
+    $script:luaSource | Should Match 'LoadStyleProfile'
+    $script:luaSource | Should Match 'DeleteStyleProfile'
+  }
+}
+
 Describe "RecklessTracker package isolation" {
+  BeforeAll {
+    Initialize-TestContext
+  }
+
   It "uses package-as to publish only the addon folder name" {
-    $pkgmetaSource | Should Match 'package-as:\s*RecklessTracker'
+    $script:pkgmetaSource | Should Match 'package-as:\s*RecklessTracker'
   }
 
   It "includes a release toc at repo root for packager discovery" {
-    (Test-Path -LiteralPath $releaseTocPath) | Should Be $true
-    $releaseToc = Get-Content -LiteralPath $releaseTocPath -Raw
+    (Test-Path -LiteralPath $script:releaseTocPath) | Should Be $true
+    $releaseToc = Get-Content -LiteralPath $script:releaseTocPath -Raw
     $releaseToc | Should Match '^##\s*Interface\s*:'
     $releaseToc | Should Match 'RecklessTracker\\RecklessTracker\.lua'
   }
@@ -168,7 +236,9 @@ Describe "RecklessTracker package isolation" {
       'tests',
       'addon-dev-learning\.md'
     ) | ForEach-Object {
-      $pkgmetaSource | Should Match ("-\s*" + $_)
+      $script:pkgmetaSource | Should Match ("-\s*" + $_)
     }
   }
 }
+
+

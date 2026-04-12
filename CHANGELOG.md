@@ -21,6 +21,10 @@
   - `scripts/run-tests.ps1` (Pester checks for TOC compatibility + startup invariants)
   - `scripts/deploy-live.ps1` (runs tests first, blocks deploy on failure)
 - Regression test that validates TOC includes the active client interface parsed from local `.build.info`.
+- GitHub verification pipeline hardening:
+  - Multi-job CI (`Verify`) with Lua lint, PowerShell tests, and packager dry-run.
+  - Packaged zip content policy check + uploaded verification artifacts.
+  - Release workflow now runs verification first and only publishes on success.
 
 ## [v0.1.1] - 2026-04-11
 
