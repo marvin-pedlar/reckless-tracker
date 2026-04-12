@@ -28,7 +28,7 @@ jobs:
       - name: Package and publish
         uses: BigWigsMods/packager@v2
         with:
-          args: -p ${{ env.CF_PROJECT_ID }}
+          args: -t RecklessTracker -p ${{ env.CF_PROJECT_ID }}
         env:
           CF_API_KEY: ${{ env.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
