@@ -31,4 +31,3 @@ jobs:
           args: -p ${{ env.CF_PROJECT_ID }}
         env:
           CF_API_KEY: ${{ env.CF_API_KEY }}
-          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
