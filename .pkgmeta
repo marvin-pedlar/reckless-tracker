@@ -2,7 +2,7 @@ package-as: RecklessTracker
 manual-changelog: CHANGELOG.md
 
 move-folders:
-  RecklessTracker: .
+  RecklessTracker: RecklessTracker
 
 ignore:
   - .gitignore

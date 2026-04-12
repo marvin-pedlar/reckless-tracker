@@ -153,7 +153,7 @@ Describe "RecklessTracker package isolation" {
 
   It "maps nested addon folder into package root for TOC discovery" {
     $pkgmetaSource | Should Match 'move-folders:'
-    $pkgmetaSource | Should Match 'RecklessTracker:\s*\.'
+    $pkgmetaSource | Should Match 'RecklessTracker:\s*RecklessTracker'
   }
 
   It "ignores internal development files and folders from release package" {
