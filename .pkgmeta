@@ -1,0 +1,11 @@
+package-as: RecklessTracker
+manual-changelog: CHANGELOG.md
+
+ignore:
+  - .github
+  - debug
+  - docs
+  - scripts
+  - tests
+  - addon-dev-learning.md
+  - README.md

@@ -1,0 +1,45 @@
+# RecklessTracker Changelog
+
+## [Unreleased]
+
+### Changed
+
+- Tracker visibility logic now shows the icon whenever configured filters pass, even with no active buff/cooldown (pre-use idle-ready state).
+- Cooldown visualization switched to edge-only style for better icon saturation visibility.
+- TOC interface line now includes `120001, 120005, 120007` for cross-build compatibility.
+- Startup order now registers `/rt` slash commands before settings panel initialization.
+
+### Fixed
+
+- Reduced cooldown overlay darkness by disabling swipe fill (`SetDrawSwipe(false)`) to prevent the icon from looking blacked out.
+- Improved timer readability by moving timer text to a dedicated layer above cooldown and using stronger text styling.
+- Settings panel initialization is wrapped in `pcall` so settings failures do not break slash commands or core tracker startup.
+
+### Added
+
+- Test-gated local pipeline:
+  - `scripts/run-tests.ps1` (Pester checks for TOC compatibility + startup invariants)
+  - `scripts/deploy-live.ps1` (runs tests first, blocks deploy on failure)
+- Regression test that validates TOC includes the active client interface parsed from local `.build.info`.
+
+## [v0.1.1] - 2026-04-11
+
+### Added
+
+- Unlock-safe move mode (`MOVE`) so the frame can always be repositioned when unlocked.
+- Icon scale controls via `/rt size <0.5-2.0>` and `/rt scale <value>`.
+- Settings slider for icon scale.
+- Cooldown pixel glow for the final 10 seconds.
+- Configurable glow color (RGB) via `/rt glow <r> <g> <b>`.
+- Settings sliders for glow red/green/blue values.
+- ElvUI-esque visual styling pass (dark matte panel, crisp pixel borders, cleaner timer/label styling).
+
+### Changed
+
+- Updated TOC interface compatibility values for Midnight builds.
+- Improved aura scan robustness and performance by validating/storing only safe numeric aura spell IDs and throttling fallback scans.
+
+### Fixed
+
+- Aura taint errors from protected/secret aura fields by removing `sourceUnit` comparisons, adding `issecretvalue`/`canaccesstable` guards, and using `HELPFUL|PLAYER` for fallback scans.
+- `/rt item` now immediately refreshes cached potion metadata.
