@@ -89,7 +89,9 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $addonDir = Join-Path $repoRoot "RecklessTracker"
 $tocPath = Join-Path $addonDir "RecklessTracker.toc"
 $luaPath = Join-Path $addonDir "RecklessTracker.lua"
+$pkgmetaPath = Join-Path $repoRoot ".pkgmeta"
 $luaSource = Get-Content -LiteralPath $luaPath -Raw
+$pkgmetaSource = Get-Content -LiteralPath $pkgmetaPath -Raw
 $tocInterfaces = [string[]](Get-TocInterfaceValues -TocPath $tocPath)
 $clientInterface = Get-ClientInterfaceFromBuildInfo
 
@@ -141,5 +143,24 @@ Describe "RecklessTracker startup hardening" {
     $fontIndex | Should BeGreaterThan -1
     $textIndex | Should BeGreaterThan -1
     $textIndex | Should BeGreaterThan $fontIndex
+  }
+}
+
+Describe "RecklessTracker package isolation" {
+  It "uses package-as to publish only the addon folder name" {
+    $pkgmetaSource | Should Match 'package-as:\s*RecklessTracker'
+  }
+
+  It "ignores internal development files and folders from release package" {
+    @(
+      '\.github',
+      'debug',
+      'docs',
+      'scripts',
+      'tests',
+      'addon-dev-learning\.md'
+    ) | ForEach-Object {
+      $pkgmetaSource | Should Match ("-\s*" + $_)
+    }
   }
 }

@@ -14,7 +14,7 @@ git branch -M main
 git push -u origin main
 ```
 
-## 3) Configure CurseForge automatic packaging
+## 3) Configure CurseForge automatic packaging (Webhook)
 
 - In CurseForge project page, get your project ID.
 - Create a CurseForge API token.
@@ -38,6 +38,20 @@ https://www.curseforge.com/api/projects/{projectID}/package?token={token}
 git tag v0.1.1
 git push origin v0.1.1
 ```
+
+## Alternative: GitHub Actions publishing (already configured in this repo)
+
+- Workflow file: `.github/workflows/release.yml`
+- Set these GitHub Actions repository secrets:
+  - `CF_API_KEY` = your CurseForge API token
+  - `CF_PROJECT_ID` = your CurseForge project numeric ID
+
+```powershell
+gh secret set CF_API_KEY -R marvin-pedlar/reckless-tracker
+gh secret set CF_PROJECT_ID -R marvin-pedlar/reckless-tracker
+```
+
+- Then push a new tag (e.g. `v0.1.1`) and the workflow uploads automatically.
 
 ## Notes
 

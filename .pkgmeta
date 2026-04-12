@@ -2,7 +2,9 @@ package-as: RecklessTracker
 manual-changelog: CHANGELOG.md
 
 ignore:
+  - .gitignore
   - .github
+  - .pkgmeta
   - debug
   - docs
   - scripts
