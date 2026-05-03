@@ -1,6 +1,6 @@
 # RecklessTracker Changelog
 
-## [v0.1.9] - 2026-05-03
+## [v0.1.10] - 2026-05-03
 
 ### Changed
 
