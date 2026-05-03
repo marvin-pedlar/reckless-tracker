@@ -7,19 +7,218 @@ local GLOW_THRESHOLD_SECONDS = 10
 local TEST_MODE_SECONDS = 20
 local READY_FLASH_SECONDS = 1.5
 local FALLBACK_ICON = 134400
-local ICON_INSET = 1
-local COOLDOWN_SWIPE_ALPHA = 0.45
+local BOOTSTRAP_ICON_INSET = 1
+local BOOTSTRAP_COOLDOWN_SWIPE_ALPHA = 0.45
+local STYLE_VERSION = 1
+
+local function NewDefaultStyle()
+  return {
+    frame = {
+      backgroundColor = { r = 0.0, g = 0.0, b = 0.0, a = 0.0 },
+      borderColor = { r = 0.12, g = 0.12, b = 0.12, a = 0.95 },
+      borderThickness = 1,
+    },
+    icon = {
+      inset = 1,
+      texCoordInset = 0.08,
+      alpha = 1.0,
+      desaturated = false,
+    },
+    cooldown = {
+      drawEdge = true,
+      drawSwipe = true,
+      swipeColor = { r = 0.0, g = 0.0, b = 0.0, a = 0.45 },
+    },
+    text = {
+      timer = {
+        color = { r = 1.0, g = 0.97, b = 0.85, a = 1.0 },
+        size = 20,
+        outline = "THICKOUTLINE",
+        shadowColor = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 },
+        shadowOffsetX = 1,
+        shadowOffsetY = -1,
+      },
+      status = {
+        readyColor = { r = 0.45, g = 1.0, b = 0.55, a = 1.0 },
+        cdColor = { r = 1.0, g = 0.82, b = 0.35, a = 1.0 },
+        size = 10,
+        outline = "OUTLINE",
+        shadowColor = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 },
+        shadowOffsetX = 1,
+        shadowOffsetY = -1,
+      },
+      flash = {
+        color = { r = 0.9, g = 0.95, b = 1.0, a = 1.0 },
+        size = 11,
+        outline = "OUTLINE",
+        shadowColor = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 },
+        shadowOffsetX = 0,
+        shadowOffsetY = 0,
+      },
+    },
+    glow = {
+      color = { r = 0.2, g = 0.8, b = 1.0, a = 1.0 },
+      thresholdSeconds = 10,
+      pulseMin = 0.4,
+      pulseMax = 1.0,
+      edgeThickness = 2,
+      cornerSize = 3,
+      cornerBoost = 0.15,
+      frameOutset = 3,
+    },
+    unlock = {
+      color = { r = 0.85, g = 0.75, b = 0.25, a = 1.0 },
+      thickness = 1,
+      frameOutset = 2,
+      statusOffsetY = 1,
+    },
+  }
+end
+
+local function NewStylePresets()
+  return {
+    ["Classic"] = NewDefaultStyle(),
+    ["ElvUI Thin"] = {
+      frame = {
+        backgroundColor = { r = 0.02, g = 0.02, b = 0.02, a = 0.06 },
+        borderColor = { r = 0.12, g = 0.12, b = 0.12, a = 0.95 },
+        borderThickness = 1,
+      },
+      icon = {
+        inset = 1,
+        texCoordInset = 0.08,
+        alpha = 1.0,
+        desaturated = false,
+      },
+      cooldown = {
+        drawEdge = true,
+        drawSwipe = true,
+        swipeColor = { r = 0.0, g = 0.0, b = 0.0, a = 0.45 },
+      },
+      text = {
+        timer = {
+          color = { r = 1.0, g = 0.97, b = 0.85, a = 1.0 },
+          size = 20,
+          outline = "THICKOUTLINE",
+          shadowColor = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 },
+          shadowOffsetX = 1,
+          shadowOffsetY = -1,
+        },
+        status = {
+          readyColor = { r = 0.45, g = 1.0, b = 0.55, a = 1.0 },
+          cdColor = { r = 1.0, g = 0.82, b = 0.35, a = 1.0 },
+          size = 10,
+          outline = "OUTLINE",
+          shadowColor = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 },
+          shadowOffsetX = 1,
+          shadowOffsetY = -1,
+        },
+        flash = {
+          color = { r = 0.9, g = 0.95, b = 1.0, a = 1.0 },
+          size = 11,
+          outline = "OUTLINE",
+          shadowColor = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 },
+          shadowOffsetX = 0,
+          shadowOffsetY = 0,
+        },
+      },
+      glow = {
+        color = { r = 0.2, g = 0.8, b = 1.0, a = 1.0 },
+        thresholdSeconds = 10,
+        pulseMin = 0.35,
+        pulseMax = 1.0,
+        edgeThickness = 2,
+        cornerSize = 3,
+        cornerBoost = 0.15,
+        frameOutset = 3,
+      },
+      unlock = {
+        color = { r = 0.85, g = 0.75, b = 0.25, a = 1.0 },
+        thickness = 1,
+        frameOutset = 2,
+        statusOffsetY = 1,
+      },
+    },
+    ["High Contrast"] = {
+      frame = {
+        backgroundColor = { r = 0.0, g = 0.0, b = 0.0, a = 0.25 },
+        borderColor = { r = 1.0, g = 1.0, b = 1.0, a = 1.0 },
+        borderThickness = 2,
+      },
+      icon = {
+        inset = 1,
+        texCoordInset = 0.08,
+        alpha = 1.0,
+        desaturated = false,
+      },
+      cooldown = {
+        drawEdge = true,
+        drawSwipe = true,
+        swipeColor = { r = 0.0, g = 0.0, b = 0.0, a = 0.65 },
+      },
+      text = {
+        timer = {
+          color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0 },
+          size = 22,
+          outline = "THICKOUTLINE",
+          shadowColor = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 },
+          shadowOffsetX = 1,
+          shadowOffsetY = -1,
+        },
+        status = {
+          readyColor = { r = 0.3, g = 1.0, b = 0.3, a = 1.0 },
+          cdColor = { r = 1.0, g = 0.9, b = 0.25, a = 1.0 },
+          size = 11,
+          outline = "THICKOUTLINE",
+          shadowColor = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 },
+          shadowOffsetX = 1,
+          shadowOffsetY = -1,
+        },
+        flash = {
+          color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0 },
+          size = 12,
+          outline = "THICKOUTLINE",
+          shadowColor = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 },
+          shadowOffsetX = 0,
+          shadowOffsetY = 0,
+        },
+      },
+      glow = {
+        color = { r = 0.2, g = 0.9, b = 1.0, a = 1.0 },
+        thresholdSeconds = 10,
+        pulseMin = 0.5,
+        pulseMax = 1.0,
+        edgeThickness = 2,
+        cornerSize = 3,
+        cornerBoost = 0.2,
+        frameOutset = 3,
+      },
+      unlock = {
+        color = { r = 1.0, g = 0.88, b = 0.3, a = 1.0 },
+        thickness = 1,
+        frameOutset = 2,
+        statusOffsetY = 1,
+      },
+    },
+  }
+end
 
 local defaults = {
   locked = false,
   scale = 1.0,
   glowColor = { r = 0.2, g = 0.8, b = 1.0 },
+  styleVersion = STYLE_VERSION,
+  activeStylePreset = "ElvUI Thin",
+  styleProfiles = {},
+  style = NewDefaultStyle(),
   position = { x = 0, y = -180 },
   potionItemID = 241289,
   auraSpellID = 0,
   alerts = {
     buffWarn = true,
     cooldownReady = true,
+    useTts = false,
+    ttsVoiceID = nil,
   },
   visibility = {
     inCombat = true,
@@ -34,7 +233,12 @@ local defaults = {
 
 local db
 local settingsPanel
+local styleSettingsPanel
 local settingsCategoryID
+local styleSettingsCategoryID
+local STYLE_PRESETS = NewStylePresets()
+local styleControlRefreshers = {}
+local anonymousSliderCount = 0
 
 local ui = {}
 local state = {
@@ -54,16 +258,142 @@ local state = {
   potionSpellID = nil,
   potionName = nil,
   potionIcon = nil,
+  potionAvailable = false,
   resolvedAuraSpellID = nil,
   nextFallbackScanAt = 0,
 }
 
 local SOUND_BUFF_WARNING = SOUNDKIT and (SOUNDKIT.RAID_WARNING or SOUNDKIT.READY_CHECK)
 local SOUND_COOLDOWN_READY = SOUNDKIT and (SOUNDKIT.READY_CHECK or SOUNDKIT.UI_PROFESSION_COOLDOWN_END)
+local ClampUnit
 
 local function SafePlaySound(soundKit)
   if soundKit then
     PlaySound(soundKit, "Master")
+  end
+end
+
+local function SafeTtsNumber(getter, fallback)
+  local ok, value = pcall(getter)
+  if ok and type(value) == "number" then
+    return value
+  end
+  return fallback
+end
+
+local STANDARD_TTS_VOICE_TYPE = Enum and Enum.TtsVoiceType and Enum.TtsVoiceType.Standard or 0
+
+local function GetDefaultTtsVoiceID()
+  if C_TTSSettings and type(C_TTSSettings.GetVoiceOptionID) == "function" then
+    local ok, value = pcall(function()
+      return C_TTSSettings.GetVoiceOptionID(STANDARD_TTS_VOICE_TYPE)
+    end)
+    if ok and type(value) == "number" then
+      return value
+    end
+  end
+  return 0
+end
+
+local function GetSelectableTtsVoices()
+  local options = {
+    { id = nil, label = "WoW default" },
+  }
+
+  if not (C_VoiceChat and type(C_VoiceChat.GetTtsVoices) == "function") then
+    return options
+  end
+
+  local ok, voices = pcall(C_VoiceChat.GetTtsVoices)
+  if not ok or type(voices) ~= "table" then
+    return options
+  end
+
+  table.sort(voices, function(left, right)
+    local leftName = type(left and left.name) == "string" and left.name or ""
+    local rightName = type(right and right.name) == "string" and right.name or ""
+    if leftName == rightName then
+      return tonumber(left and left.voiceID or 0) < tonumber(right and right.voiceID or 0)
+    end
+    return leftName < rightName
+  end)
+
+  for _, voice in ipairs(voices) do
+    if type(voice.voiceID) == "number" then
+      local label = voice.name
+      if type(label) ~= "string" or label == "" then
+        label = "Voice " .. voice.voiceID
+      end
+      options[#options + 1] = {
+        id = voice.voiceID,
+        label = label,
+      }
+    end
+  end
+
+  return options
+end
+
+local function ResolveTtsVoiceID()
+  if type(db.alerts.ttsVoiceID) ~= "number" then
+    return GetDefaultTtsVoiceID()
+  end
+
+  for _, voice in ipairs(GetSelectableTtsVoices()) do
+    if voice.id == db.alerts.ttsVoiceID then
+      return db.alerts.ttsVoiceID
+    end
+  end
+
+  return GetDefaultTtsVoiceID()
+end
+
+local function GetTtsVoiceID()
+  local voiceID = ResolveTtsVoiceID()
+  if type(voiceID) == "number" then
+    return voiceID
+  end
+  return 0
+end
+
+local function GetTtsSpeechRate()
+  if C_TTSSettings and type(C_TTSSettings.GetSpeechRate) == "function" then
+    return SafeTtsNumber(C_TTSSettings.GetSpeechRate, 0)
+  end
+  return 0
+end
+
+local function GetTtsSpeechVolume()
+  if C_TTSSettings and type(C_TTSSettings.GetSpeechVolume) == "function" then
+    return SafeTtsNumber(C_TTSSettings.GetSpeechVolume, 100)
+  end
+  return 100
+end
+
+local function SpeakTtsAlert(text)
+  if not (C_VoiceChat and type(C_VoiceChat.SpeakText) == "function") then
+    return false
+  end
+
+  local voiceID = GetTtsVoiceID()
+  local rate = GetTtsSpeechRate()
+  local volume = GetTtsSpeechVolume()
+  local ok = pcall(C_VoiceChat.SpeakText, voiceID, text, rate, volume, true)
+  return ok
+end
+
+local function AlertPotionReady()
+  if db.alerts.useTts and SpeakTtsAlert("potion ready") then
+    return
+  end
+  if db.alerts.cooldownReady then
+    SafePlaySound(SOUND_COOLDOWN_READY)
+  end
+end
+
+local function AlertPotionEnded()
+  if db.alerts.useTts then
+    SpeakTtsAlert("potion ended")
   end
 end
 
@@ -78,6 +408,173 @@ local function DeepCopyDefaults(src, dest)
       dest[key] = value
     end
   end
+end
+
+local function DeepCopyTable(value)
+  if type(value) ~= "table" then
+    return value
+  end
+  local copied = {}
+  for key, subValue in pairs(value) do
+    copied[key] = DeepCopyTable(subValue)
+  end
+  return copied
+end
+
+local function ClampRange(value, minValue, maxValue, fallback)
+  local n = tonumber(value)
+  if not n then
+    n = fallback or minValue
+  end
+  if n < minValue then
+    return minValue
+  end
+  if n > maxValue then
+    return maxValue
+  end
+  return n
+end
+
+local function NormalizeColor(color, fallback)
+  local safeFallback = fallback or { r = 1, g = 1, b = 1, a = 1 }
+  if type(color) ~= "table" then
+    color = {}
+  end
+  color.r = ClampUnit(color.r, safeFallback.r or 1)
+  color.g = ClampUnit(color.g, safeFallback.g or 1)
+  color.b = ClampUnit(color.b, safeFallback.b or 1)
+  color.a = ClampUnit(color.a, safeFallback.a or 1)
+  return color
+end
+
+local function NormalizeStyle()
+  if type(db.style) ~= "table" then
+    db.style = {}
+  end
+  DeepCopyDefaults(NewDefaultStyle(), db.style)
+
+  db.style.frame.backgroundColor = NormalizeColor(db.style.frame.backgroundColor, { r = 0, g = 0, b = 0, a = 0 })
+  db.style.frame.borderColor = NormalizeColor(db.style.frame.borderColor, { r = 0.12, g = 0.12, b = 0.12, a = 0.95 })
+  db.style.frame.borderThickness = ClampRange(db.style.frame.borderThickness, 1, 4, 1)
+
+  db.style.icon.inset = ClampRange(db.style.icon.inset, 0, 8, 1)
+  db.style.icon.texCoordInset = ClampRange(db.style.icon.texCoordInset, 0, 0.25, 0.08)
+  db.style.icon.alpha = ClampUnit(db.style.icon.alpha, 1.0)
+  db.style.icon.desaturated = db.style.icon.desaturated and true or false
+
+  db.style.cooldown.drawEdge = db.style.cooldown.drawEdge ~= false
+  db.style.cooldown.drawSwipe = db.style.cooldown.drawSwipe ~= false
+  db.style.cooldown.swipeColor = NormalizeColor(db.style.cooldown.swipeColor, { r = 0, g = 0, b = 0, a = 0.45 })
+
+  db.style.text.timer.color = NormalizeColor(db.style.text.timer.color, { r = 1, g = 0.97, b = 0.85, a = 1 })
+  db.style.text.timer.shadowColor = NormalizeColor(db.style.text.timer.shadowColor, { r = 0, g = 0, b = 0, a = 1 })
+  db.style.text.timer.size = ClampRange(db.style.text.timer.size, 10, 40, 20)
+  db.style.text.timer.shadowOffsetX = ClampRange(db.style.text.timer.shadowOffsetX, -4, 4, 1)
+  db.style.text.timer.shadowOffsetY = ClampRange(db.style.text.timer.shadowOffsetY, -4, 4, -1)
+  db.style.text.timer.outline = tostring(db.style.text.timer.outline or "THICKOUTLINE")
+
+  db.style.text.status.readyColor = NormalizeColor(db.style.text.status.readyColor, { r = 0.45, g = 1.0, b = 0.55, a = 1 })
+  db.style.text.status.cdColor = NormalizeColor(db.style.text.status.cdColor, { r = 1.0, g = 0.82, b = 0.35, a = 1 })
+  db.style.text.status.shadowColor = NormalizeColor(db.style.text.status.shadowColor, { r = 0, g = 0, b = 0, a = 1 })
+  db.style.text.status.size = ClampRange(db.style.text.status.size, 8, 24, 10)
+  db.style.text.status.shadowOffsetX = ClampRange(db.style.text.status.shadowOffsetX, -4, 4, 1)
+  db.style.text.status.shadowOffsetY = ClampRange(db.style.text.status.shadowOffsetY, -4, 4, -1)
+  db.style.text.status.outline = tostring(db.style.text.status.outline or "OUTLINE")
+
+  db.style.text.flash.color = NormalizeColor(db.style.text.flash.color, { r = 0.9, g = 0.95, b = 1.0, a = 1 })
+  db.style.text.flash.shadowColor = NormalizeColor(db.style.text.flash.shadowColor, { r = 0, g = 0, b = 0, a = 1 })
+  db.style.text.flash.size = ClampRange(db.style.text.flash.size, 8, 24, 11)
+  db.style.text.flash.shadowOffsetX = ClampRange(db.style.text.flash.shadowOffsetX, -4, 4, 0)
+  db.style.text.flash.shadowOffsetY = ClampRange(db.style.text.flash.shadowOffsetY, -4, 4, 0)
+  db.style.text.flash.outline = tostring(db.style.text.flash.outline or "OUTLINE")
+
+  db.style.glow.color = NormalizeColor(db.style.glow.color, { r = 0.2, g = 0.8, b = 1.0, a = 1 })
+  db.style.glow.thresholdSeconds = ClampRange(db.style.glow.thresholdSeconds, 1, 30, 10)
+  db.style.glow.pulseMin = ClampRange(db.style.glow.pulseMin, 0.0, 1.0, 0.4)
+  db.style.glow.pulseMax = ClampRange(db.style.glow.pulseMax, db.style.glow.pulseMin, 1.0, 1.0)
+  db.style.glow.edgeThickness = ClampRange(db.style.glow.edgeThickness, 1, 6, 2)
+  db.style.glow.cornerSize = ClampRange(db.style.glow.cornerSize, 1, 8, 3)
+  db.style.glow.cornerBoost = ClampRange(db.style.glow.cornerBoost, 0.0, 0.5, 0.15)
+  db.style.glow.frameOutset = ClampRange(db.style.glow.frameOutset, 0, 8, 3)
+
+  db.style.unlock.color = NormalizeColor(db.style.unlock.color, { r = 0.85, g = 0.75, b = 0.25, a = 1 })
+  db.style.unlock.thickness = ClampRange(db.style.unlock.thickness, 1, 4, 1)
+  db.style.unlock.frameOutset = ClampRange(db.style.unlock.frameOutset, 0, 8, 2)
+  db.style.unlock.statusOffsetY = ClampRange(db.style.unlock.statusOffsetY, -6, 8, 1)
+end
+
+local function MigrateLegacyStyleSettings()
+  if db.styleVersion and db.styleVersion >= STYLE_VERSION then
+    NormalizeStyle()
+    db.glowColor = db.style.glow.color
+    return
+  end
+
+  NormalizeStyle()
+  if type(db.glowColor) == "table" then
+    db.style.glow.color.r = ClampUnit(db.glowColor.r, db.style.glow.color.r)
+    db.style.glow.color.g = ClampUnit(db.glowColor.g, db.style.glow.color.g)
+    db.style.glow.color.b = ClampUnit(db.glowColor.b, db.style.glow.color.b)
+  end
+  db.styleVersion = STYLE_VERSION
+  db.activeStylePreset = db.activeStylePreset or "ElvUI Thin"
+  db.styleProfiles = type(db.styleProfiles) == "table" and db.styleProfiles or {}
+  db.glowColor = db.style.glow.color
+end
+
+local function EnsureStyleSchema()
+  db.activeStylePreset = db.activeStylePreset or "ElvUI Thin"
+  db.styleProfiles = type(db.styleProfiles) == "table" and db.styleProfiles or {}
+  MigrateLegacyStyleSettings()
+end
+
+local function ApplyStylePreset(name)
+  local preset = STYLE_PRESETS[name]
+  if not preset then
+    return false
+  end
+  db.style = DeepCopyTable(preset)
+  db.activeStylePreset = name
+  NormalizeStyle()
+  db.glowColor = db.style.glow.color
+  return true
+end
+
+local function SaveStyleProfile(name)
+  local trimmed = strtrim(name or "")
+  if trimmed == "" then
+    return false, "Profile name is required."
+  end
+  db.styleProfiles[trimmed] = DeepCopyTable(db.style)
+  return true
+end
+
+local function LoadStyleProfile(name)
+  local trimmed = strtrim(name or "")
+  if trimmed == "" then
+    return false, "Profile name is required."
+  end
+  local profile = db.styleProfiles[trimmed]
+  if type(profile) ~= "table" then
+    return false, "Profile not found."
+  end
+  db.style = DeepCopyTable(profile)
+  db.activeStylePreset = "Custom: " .. trimmed
+  NormalizeStyle()
+  db.glowColor = db.style.glow.color
+  return true
+end
+
+local function DeleteStyleProfile(name)
+  local trimmed = strtrim(name or "")
+  if trimmed == "" then
+    return false, "Profile name is required."
+  end
+  if not db.styleProfiles[trimmed] then
+    return false, "Profile not found."
+  end
+  db.styleProfiles[trimmed] = nil
+  return true
 end
 
 local function Print(msg)
@@ -116,6 +613,25 @@ local function RefreshPotionData()
   if ui.icon then
     ui.icon:SetTexture(state.potionIcon)
   end
+end
+
+local function IsPotionAvailable()
+  local itemID = db and db.potionItemID
+  if not itemID then
+    return false
+  end
+
+  local count = 0
+  if C_Item and C_Item.GetItemCount then
+    local ok, result = pcall(C_Item.GetItemCount, itemID, false, false, false)
+    if ok then
+      count = result or 0
+    end
+  elseif GetItemCount then
+    count = GetItemCount(itemID, false, false) or 0
+  end
+
+  return count > 0
 end
 
 local function IsSecretValue(value)
@@ -326,7 +842,7 @@ local function ClampScale(value)
   return n
 end
 
-local function ClampUnit(value, fallback)
+ClampUnit = function(value, fallback)
   local n = tonumber(value)
   if not n then
     return fallback or 0
@@ -348,28 +864,192 @@ local function ApplyFrameScale()
   ui.frame:SetScale(db.scale)
 end
 
-local function ApplyGlowColor()
-  if not db.glowColor then
-    db.glowColor = { r = 0.2, g = 0.8, b = 1.0 }
+local function GetOutlineFlag(outline)
+  local value = string.upper(tostring(outline or "NONE"))
+  if value == "THICKOUTLINE" then
+    return "THICKOUTLINE"
   end
-  db.glowColor.r = ClampUnit(db.glowColor.r, 0.2)
-  db.glowColor.g = ClampUnit(db.glowColor.g, 0.8)
-  db.glowColor.b = ClampUnit(db.glowColor.b, 1.0)
+  if value == "OUTLINE" then
+    return "OUTLINE"
+  end
+  return ""
+end
 
-  if not ui.glowEdges then
+local function ApplyFrameStyle()
+  if not ui.frame or not ui.panel or not db.style then
     return
   end
 
-  local r, g, b = db.glowColor.r, db.glowColor.g, db.glowColor.b
+  local frameStyle = db.style.frame
+  local iconStyle = db.style.icon
+  local borderThickness = math.floor(frameStyle.borderThickness + 0.5)
+
+  if ui.panel.SetBackdrop then
+    ui.panel:SetBackdrop({
+      bgFile = "Interface\\Buttons\\WHITE8x8",
+      edgeFile = "Interface\\Buttons\\WHITE8x8",
+      edgeSize = borderThickness,
+    })
+    ui.panel:SetBackdropColor(
+      frameStyle.backgroundColor.r,
+      frameStyle.backgroundColor.g,
+      frameStyle.backgroundColor.b,
+      frameStyle.backgroundColor.a
+    )
+    ui.panel:SetBackdropBorderColor(
+      frameStyle.borderColor.r,
+      frameStyle.borderColor.g,
+      frameStyle.borderColor.b,
+      frameStyle.borderColor.a
+    )
+  elseif ui.panelBG then
+    ui.panelBG:SetColorTexture(
+      frameStyle.backgroundColor.r,
+      frameStyle.backgroundColor.g,
+      frameStyle.backgroundColor.b,
+      frameStyle.backgroundColor.a
+    )
+  end
+
+  if ui.icon then
+    local inset = iconStyle.inset
+    ui.icon:ClearAllPoints()
+    ui.icon:SetPoint("TOPLEFT", ui.panel, "TOPLEFT", inset, -inset)
+    ui.icon:SetPoint("BOTTOMRIGHT", ui.panel, "BOTTOMRIGHT", -inset, inset)
+    local texInset = iconStyle.texCoordInset
+    ui.icon:SetTexCoord(texInset, 1 - texInset, texInset, 1 - texInset)
+    ui.icon:SetVertexColor(1, 1, 1, iconStyle.alpha)
+    ui.icon:SetDesaturated(iconStyle.desaturated)
+  end
+end
+
+local function ApplyCooldownStyle()
+  if not ui.cooldown or not db.style then
+    return
+  end
+  local cooldownStyle = db.style.cooldown
+  if ui.cooldown.SetDrawEdge then
+    ui.cooldown:SetDrawEdge(cooldownStyle.drawEdge)
+  end
+  if ui.cooldown.SetDrawSwipe then
+    ui.cooldown:SetDrawSwipe(cooldownStyle.drawSwipe)
+  end
+  if ui.cooldown.SetSwipeColor then
+    ui.cooldown:SetSwipeColor(
+      cooldownStyle.swipeColor.r,
+      cooldownStyle.swipeColor.g,
+      cooldownStyle.swipeColor.b,
+      cooldownStyle.swipeColor.a
+    )
+  end
+end
+
+local function ApplyTextStyle()
+  if not db.style then
+    return
+  end
+  local timerStyle = db.style.text.timer
+  local statusStyle = db.style.text.status
+  local flashStyle = db.style.text.flash
+
+  if ui.timerText then
+    ui.timerText:SetFont(STANDARD_TEXT_FONT, timerStyle.size, GetOutlineFlag(timerStyle.outline))
+    ui.timerText:SetTextColor(timerStyle.color.r, timerStyle.color.g, timerStyle.color.b, timerStyle.color.a)
+    ui.timerText:SetShadowOffset(timerStyle.shadowOffsetX, timerStyle.shadowOffsetY)
+    ui.timerText:SetShadowColor(
+      timerStyle.shadowColor.r,
+      timerStyle.shadowColor.g,
+      timerStyle.shadowColor.b,
+      timerStyle.shadowColor.a
+    )
+  end
+
+  if ui.statusText then
+    local statusOffsetY = db.style.unlock.statusOffsetY or 1
+    ui.statusText:ClearAllPoints()
+    ui.statusText:SetPoint("BOTTOM", ui.frame, "TOP", 0, statusOffsetY)
+    ui.statusText:SetFont(STANDARD_TEXT_FONT, statusStyle.size, GetOutlineFlag(statusStyle.outline))
+    ui.statusText:SetShadowOffset(statusStyle.shadowOffsetX, statusStyle.shadowOffsetY)
+    ui.statusText:SetShadowColor(
+      statusStyle.shadowColor.r,
+      statusStyle.shadowColor.g,
+      statusStyle.shadowColor.b,
+      statusStyle.shadowColor.a
+    )
+  end
+
+  if ui.flashText then
+    ui.flashText:SetFont(STANDARD_TEXT_FONT, flashStyle.size, GetOutlineFlag(flashStyle.outline))
+    ui.flashText:SetTextColor(flashStyle.color.r, flashStyle.color.g, flashStyle.color.b, flashStyle.color.a)
+    ui.flashText:SetShadowOffset(flashStyle.shadowOffsetX, flashStyle.shadowOffsetY)
+    ui.flashText:SetShadowColor(
+      flashStyle.shadowColor.r,
+      flashStyle.shadowColor.g,
+      flashStyle.shadowColor.b,
+      flashStyle.shadowColor.a
+    )
+  end
+end
+
+local function ApplyUnlockStyle()
+  if not ui.unlockFrame or not ui.unlockEdges or not db.style then
+    return
+  end
+  local unlockStyle = db.style.unlock
+  local color = unlockStyle.color
+  local thickness = unlockStyle.thickness
+  local outset = unlockStyle.frameOutset
+
+  ui.unlockFrame:ClearAllPoints()
+  ui.unlockFrame:SetPoint("TOPLEFT", ui.frame, "TOPLEFT", -outset, outset)
+  ui.unlockFrame:SetPoint("BOTTOMRIGHT", ui.frame, "BOTTOMRIGHT", outset, -outset)
+
+  ui.unlockEdges.top:SetColorTexture(color.r, color.g, color.b, color.a)
+  ui.unlockEdges.bottom:SetColorTexture(color.r, color.g, color.b, color.a)
+  ui.unlockEdges.left:SetColorTexture(color.r, color.g, color.b, color.a)
+  ui.unlockEdges.right:SetColorTexture(color.r, color.g, color.b, color.a)
+  ui.unlockEdges.top:SetHeight(thickness)
+  ui.unlockEdges.bottom:SetHeight(thickness)
+  ui.unlockEdges.left:SetWidth(thickness)
+  ui.unlockEdges.right:SetWidth(thickness)
+end
+
+local function ApplyGlowColor()
+  if not ui.glowEdges or not ui.glowCorners or not db.style then
+    return
+  end
+  local glowStyle = db.style.glow
+  local color = glowStyle.color
+  local cr = ClampUnit(color.r + glowStyle.cornerBoost, 1.0)
+  local cg = ClampUnit(color.g + glowStyle.cornerBoost, 1.0)
+  local cb = ClampUnit(color.b + glowStyle.cornerBoost, 1.0)
+
   for _, tex in ipairs(ui.glowEdges) do
-    tex:SetColorTexture(r, g, b, 1.0)
+    tex:SetColorTexture(color.r, color.g, color.b, color.a)
   end
-  local cr = ClampUnit(r + 0.15, 1.0)
-  local cg = ClampUnit(g + 0.15, 1.0)
-  local cb = ClampUnit(b + 0.15, 1.0)
   for _, tex in ipairs(ui.glowCorners) do
-    tex:SetColorTexture(cr, cg, cb, 1.0)
+    tex:SetColorTexture(cr, cg, cb, color.a)
+    tex:SetSize(glowStyle.cornerSize, glowStyle.cornerSize)
   end
+
+  ui.glowEdges[1]:SetHeight(glowStyle.edgeThickness)
+  ui.glowEdges[2]:SetHeight(glowStyle.edgeThickness)
+  ui.glowEdges[3]:SetWidth(glowStyle.edgeThickness)
+  ui.glowEdges[4]:SetWidth(glowStyle.edgeThickness)
+
+  local outset = glowStyle.frameOutset
+  ui.glowFrame:ClearAllPoints()
+  ui.glowFrame:SetPoint("TOPLEFT", ui.frame, "TOPLEFT", -outset, outset)
+  ui.glowFrame:SetPoint("BOTTOMRIGHT", ui.frame, "BOTTOMRIGHT", outset, -outset)
+end
+
+local function ApplyAllStyles()
+  NormalizeStyle()
+  ApplyFrameStyle()
+  ApplyCooldownStyle()
+  ApplyTextStyle()
+  ApplyUnlockStyle()
+  ApplyGlowColor()
 end
 
 local function SavePosition()
@@ -383,18 +1063,21 @@ local function TriggerReadyFlash()
 end
 
 local function UpdatePixelGlow(now, testMode)
-  if not ui.glowFrame then
+  if not ui.glowFrame or not db.style then
     return
   end
 
-  local glowActive = (not testMode) and (not state.buffActive) and state.cooldownActive and state.cooldownRemaining <= GLOW_THRESHOLD_SECONDS
+  local glowStyle = db.style.glow
+  local glowActive = (not testMode) and (not state.buffActive) and state.cooldownActive and state.cooldownRemaining <= glowStyle.thresholdSeconds
   if not glowActive then
     ui.glowFrame:Hide()
     return
   end
 
   ui.glowFrame:Show()
-  local pulse = 0.4 + (0.6 * (0.5 + 0.5 * math.sin(now * 10)))
+  local minPulse = glowStyle.pulseMin
+  local maxPulse = glowStyle.pulseMax
+  local pulse = minPulse + ((maxPulse - minPulse) * (0.5 + 0.5 * math.sin(now * 10)))
   ui.glowFrame:SetAlpha(pulse)
 end
 
@@ -406,7 +1089,9 @@ local function Render()
   local now = GetTime()
   local testMode = IsTestModeActive()
   local moveMode = not db.locked
-  local show = moveMode or testMode or ShouldShowByFilters()
+  local hasTrackedState = state.buffActive or state.cooldownActive
+  local showableAvailability = hasTrackedState or state.potionAvailable
+  local show = moveMode or testMode or (showableAvailability and ShouldShowByFilters())
 
   if not show then
     ui.frame:Hide()
@@ -444,12 +1129,31 @@ local function Render()
 
   ui.timerText:SetText(text)
   if ui.statusText then
+    local statusStyle = db.style and db.style.text and db.style.text.status
     if testMode or state.cooldownActive then
       ui.statusText:SetText("CD")
-      ui.statusText:SetTextColor(1.0, 0.82, 0.35)
+      if statusStyle then
+        ui.statusText:SetTextColor(
+          statusStyle.cdColor.r,
+          statusStyle.cdColor.g,
+          statusStyle.cdColor.b,
+          statusStyle.cdColor.a
+        )
+      else
+        ui.statusText:SetTextColor(1.0, 0.82, 0.35)
+      end
     else
       ui.statusText:SetText("READY")
-      ui.statusText:SetTextColor(0.45, 1.0, 0.55)
+      if statusStyle then
+        ui.statusText:SetTextColor(
+          statusStyle.readyColor.r,
+          statusStyle.readyColor.g,
+          statusStyle.readyColor.b,
+          statusStyle.readyColor.a
+        )
+      else
+        ui.statusText:SetTextColor(0.45, 1.0, 0.55)
+      end
     end
   end
   UpdatePixelGlow(now, testMode)
@@ -470,12 +1174,17 @@ local function RefreshState()
   local prevCooldownActive = state.cooldownActive
   local prevCooldownRemaining = state.cooldownRemaining
 
+  state.potionAvailable = IsPotionAvailable()
   state.buffActive, state.buffRemaining, state.buffExpiration, state.buffDuration, state.buffStart = GetBuffState()
   state.cooldownActive, state.cooldownRemaining, state.cooldownStart, state.cooldownDuration = GetCooldownState()
 
   if state.buffActive and not prevBuffActive then
     state.buffWarned = false
     state.readyAnnounced = false
+  end
+
+  if prevBuffActive and not state.buffActive then
+    AlertPotionEnded()
   end
 
   if state.buffActive then
@@ -496,9 +1205,7 @@ local function RefreshState()
   if (not state.cooldownActive) and prevCooldownRemaining > 0 and not state.readyAnnounced then
     state.readyAnnounced = true
     TriggerReadyFlash()
-    if db.alerts.cooldownReady then
-      SafePlaySound(SOUND_COOLDOWN_READY)
-    end
+    AlertPotionReady()
   end
 end
 
@@ -534,6 +1241,7 @@ local function CreateTrackerFrame()
   local panel = CreateFrame("Frame", nil, frame, backdropTemplate)
   panel:SetAllPoints(frame)
   panel:SetFrameLevel(frame:GetFrameLevel())
+  ui.panelBG = nil
   if panel.SetBackdrop then
     panel:SetBackdrop({
       bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -546,11 +1254,12 @@ local function CreateTrackerFrame()
     local panelBG = panel:CreateTexture(nil, "BACKGROUND")
     panelBG:SetAllPoints(panel)
     panelBG:SetColorTexture(0, 0, 0, 0)
+    ui.panelBG = panelBG
   end
 
   local icon = panel:CreateTexture(nil, "ARTWORK")
-  icon:SetPoint("TOPLEFT", panel, "TOPLEFT", ICON_INSET, -ICON_INSET)
-  icon:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -ICON_INSET, ICON_INSET)
+  icon:SetPoint("TOPLEFT", panel, "TOPLEFT", BOOTSTRAP_ICON_INSET, -BOOTSTRAP_ICON_INSET)
+  icon:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -BOOTSTRAP_ICON_INSET, BOOTSTRAP_ICON_INSET)
   icon:SetTexture(state.potionIcon or FALLBACK_ICON)
   icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
   icon:SetDesaturated(false)
@@ -570,7 +1279,7 @@ local function CreateTrackerFrame()
     cooldown:SetDrawSwipe(true)
   end
   if cooldown.SetSwipeColor then
-    cooldown:SetSwipeColor(0, 0, 0, COOLDOWN_SWIPE_ALPHA)
+    cooldown:SetSwipeColor(0, 0, 0, BOOTSTRAP_COOLDOWN_SWIPE_ALPHA)
   end
   if cooldown.SetHideCountdownNumbers then
     cooldown:SetHideCountdownNumbers(true)
@@ -674,6 +1383,12 @@ local function CreateTrackerFrame()
   ui.icon = icon
   ui.cooldown = cooldown
   ui.unlockFrame = unlockFrame
+  ui.unlockEdges = {
+    top = unlockTop,
+    bottom = unlockBottom,
+    left = unlockLeft,
+    right = unlockRight,
+  }
   ui.glowFrame = glowFrame
   ui.glowEdges = { glowTop, glowBottom, glowLeft, glowRight }
   ui.glowCorners = corners
@@ -684,7 +1399,7 @@ local function CreateTrackerFrame()
 
   ApplyFrameLock()
   ApplyFrameScale()
-  ApplyGlowColor()
+  ApplyAllStyles()
   frame:SetScript("OnUpdate", OnUpdate)
 end
 
@@ -709,6 +1424,10 @@ local function CreateCheckbox(parent, label, x, y, getter, setter)
 end
 
 local function CreateSlider(parent, name, x, y, width, minValue, maxValue, step, label, lowText, highText, getValue, onValueChanged)
+  if not name then
+    anonymousSliderCount = anonymousSliderCount + 1
+    name = "RecklessTrackerAnonSlider" .. anonymousSliderCount
+  end
   local slider = CreateFrame("Slider", name, parent, "OptionsSliderTemplate")
   slider:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
   slider:SetMinMaxValues(minValue, maxValue)
@@ -736,7 +1455,227 @@ local function OpenSettings()
   end
 end
 
+local function OpenStyleSettings()
+  if Settings and Settings.OpenToCategory and styleSettingsCategoryID then
+    Settings.OpenToCategory(styleSettingsCategoryID)
+    return
+  end
+  if InterfaceOptionsFrame_OpenToCategory and styleSettingsPanel then
+    InterfaceOptionsFrame_OpenToCategory(styleSettingsPanel)
+    InterfaceOptionsFrame_OpenToCategory(styleSettingsPanel)
+  end
+end
+
+local function CreateButton(parent, text, x, y, width, onClick)
+  local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+  button:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
+  button:SetSize(width, 22)
+  button:SetText(text)
+  button:SetScript("OnClick", onClick)
+  return button
+end
+
+local function CreateEditBox(parent, x, y, width, height)
+  local editBox = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
+  editBox:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
+  editBox:SetSize(width, height or 22)
+  editBox:SetAutoFocus(false)
+  editBox:SetTextInsets(6, 6, 0, 0)
+  return editBox
+end
+
+local function SetColorSwatch(button, color)
+  if not button.swatch then
+    return
+  end
+  button.swatch:SetColorTexture(color.r, color.g, color.b, 1)
+end
+
+local function OpenColorPicker(initialColor, onChanged)
+  local startColor = {
+    r = ClampUnit(initialColor.r, 1),
+    g = ClampUnit(initialColor.g, 1),
+    b = ClampUnit(initialColor.b, 1),
+  }
+
+  local function Commit()
+    local r, g, b
+    if ColorPickerFrame and ColorPickerFrame.GetColorRGB then
+      r, g, b = ColorPickerFrame:GetColorRGB()
+    elseif ColorPickerFrame and ColorPickerFrame.Content and ColorPickerFrame.Content.ColorPicker then
+      local c1, c2, c3 = ColorPickerFrame.Content.ColorPicker:GetColorRGB()
+      if type(c1) == "table" then
+        r, g, b = c1.r, c1.g, c1.b
+      else
+        r, g, b = c1, c2, c3
+      end
+    end
+    if r and g and b then
+      onChanged(ClampUnit(r, startColor.r), ClampUnit(g, startColor.g), ClampUnit(b, startColor.b))
+    end
+  end
+
+  local function Cancel(previous)
+    if type(previous) == "table" and previous.r then
+      onChanged(ClampUnit(previous.r, startColor.r), ClampUnit(previous.g, startColor.g), ClampUnit(previous.b, startColor.b))
+    else
+      onChanged(startColor.r, startColor.g, startColor.b)
+    end
+  end
+
+  if ColorPickerFrame and ColorPickerFrame.SetupColorPickerAndShow then
+    ColorPickerFrame:SetupColorPickerAndShow({
+      r = startColor.r,
+      g = startColor.g,
+      b = startColor.b,
+      swatchFunc = Commit,
+      opacityFunc = Commit,
+      cancelFunc = Cancel,
+      hasOpacity = false,
+    })
+    return
+  end
+
+  if ColorPickerFrame and ColorPickerFrame.SetColorRGB then
+    ColorPickerFrame:SetColorRGB(startColor.r, startColor.g, startColor.b)
+    ColorPickerFrame.hasOpacity = false
+    ColorPickerFrame.previousValues = { r = startColor.r, g = startColor.g, b = startColor.b }
+    ColorPickerFrame.func = Commit
+    ColorPickerFrame.cancelFunc = Cancel
+    ColorPickerFrame:Show()
+  end
+end
+
+local function NotifyStyleChanged()
+  EnsureStyleSchema()
+  ApplyAllStyles()
+  RefreshState()
+  Render()
+end
+
+local function CreateColorControl(parent, label, x, y, getColor, setColor)
+  local title = parent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+  title:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
+  title:SetText(label)
+
+  local colorButton = CreateButton(parent, "Pick", x, y - 18, 60, function()
+    local color = getColor()
+    OpenColorPicker(color, function(r, g, b)
+      local updated = getColor()
+      updated.r = r
+      updated.g = g
+      updated.b = b
+      setColor(updated)
+      SetColorSwatch(colorButton, updated)
+      NotifyStyleChanged()
+    end)
+  end)
+  colorButton.swatch = colorButton:CreateTexture(nil, "ARTWORK")
+  colorButton.swatch:SetPoint("LEFT", colorButton, "RIGHT", 6, 0)
+  colorButton.swatch:SetSize(24, 14)
+
+  local alphaSlider = CreateSlider(
+    parent,
+    nil,
+    x + 104,
+    y - 10,
+    180,
+    0.0,
+    1.0,
+    0.01,
+    "Opacity",
+    "0.00",
+    "1.00",
+    function() return getColor().a end,
+    function(value)
+      local updated = getColor()
+      updated.a = ClampUnit(value, updated.a)
+      setColor(updated)
+      NotifyStyleChanged()
+    end
+  )
+
+  local function Refresh()
+    local current = getColor()
+    SetColorSwatch(colorButton, current)
+    alphaSlider:SetValue(current.a)
+  end
+
+  table.insert(styleControlRefreshers, Refresh)
+  return Refresh
+end
+
+local function CreateOutlineCycle(parent, label, x, y, getValue, setValue)
+  local options = { "NONE", "OUTLINE", "THICKOUTLINE" }
+  local button = CreateButton(parent, "", x, y, 220, function(self)
+    local current = string.upper(tostring(getValue() or "NONE"))
+    local nextIndex = 1
+    for i, value in ipairs(options) do
+      if value == current then
+        nextIndex = (i % #options) + 1
+        break
+      end
+    end
+    setValue(options[nextIndex])
+    NotifyStyleChanged()
+    self:SetText(label .. ": " .. options[nextIndex])
+  end)
+
+  local function Refresh()
+    local current = string.upper(tostring(getValue() or "NONE"))
+    button:SetText(label .. ": " .. current)
+  end
+
+  table.insert(styleControlRefreshers, Refresh)
+  return Refresh
+end
+
+local function CreateTtsVoiceCycleButton(parent, x, y)
+  local button = CreateButton(parent, "", x, y, 220, function(self)
+    local options = GetSelectableTtsVoices()
+    if #options == 0 then
+      return
+    end
+    local currentID = db.alerts.ttsVoiceID
+    local nextIndex = 1
+
+    for i, option in ipairs(options) do
+      if option.id == currentID then
+        nextIndex = (i % #options) + 1
+        break
+      end
+    end
+
+    db.alerts.ttsVoiceID = options[nextIndex].id
+    self:SetText("TTS voice:" .. " " .. options[nextIndex].label)
+  end)
+
+  local function Refresh()
+    local options = GetSelectableTtsVoices()
+    if #options == 0 then
+      button:SetText("TTS voice: none")
+      button:SetEnabled(false)
+      return
+    end
+    local currentLabel = "WoW default"
+
+    for _, option in ipairs(options) do
+      if option.id == db.alerts.ttsVoiceID then
+        currentLabel = option.label
+        break
+      end
+    end
+
+    button:SetText("TTS voice:" .. " " .. currentLabel)
+    button:SetEnabled(#options > 1)
+  end
+
+  return button, Refresh
+end
+
 local function RegisterSettingsPanel()
+  styleControlRefreshers = {}
+
   local panel = CreateFrame("Frame")
   panel.name = "RecklessTracker"
 
@@ -758,9 +1697,10 @@ local function RegisterSettingsPanel()
     { "Show in Delves", -206, function() return db.visibility.delve end, function(v) db.visibility.delve = v end },
     { "Buff warning sound", -242, function() return db.alerts.buffWarn end, function(v) db.alerts.buffWarn = v end },
     { "Cooldown ready sound", -266, function() return db.alerts.cooldownReady end, function(v) db.alerts.cooldownReady = v end },
+    { "Use TTS alerts", -290, function() return db.alerts.useTts end, function(v) db.alerts.useTts = v end },
     {
       "Lock frame",
-      -302,
+      -350,
       function() return db.locked end,
       function(v)
         db.locked = v
@@ -775,17 +1715,18 @@ local function RegisterSettingsPanel()
     table.insert(checkboxes, { check = check, getter = entry[3] })
   end
 
+  local _, refreshTtsVoiceButton = CreateTtsVoiceCycleButton(panel, 16, -314)
+
   panel:SetScript("OnShow", function()
     for _, control in ipairs(checkboxes) do
       control.check:SetChecked(control.getter())
     end
+    refreshTtsVoiceButton()
     if ui.scaleSlider then
       ui.scaleSlider:SetValue(db.scale)
     end
-    if ui.glowRedSlider then
-      ui.glowRedSlider:SetValue(db.glowColor.r)
-      ui.glowGreenSlider:SetValue(db.glowColor.g)
-      ui.glowBlueSlider:SetValue(db.glowColor.b)
+    if ui.scaleValueText then
+      ui.scaleValueText:SetText(string.format("%.2f", db.scale))
     end
   end)
 
@@ -793,7 +1734,7 @@ local function RegisterSettingsPanel()
     panel,
     "RecklessTrackerScaleSlider",
     20,
-    -352,
+    -376,
     220,
     0.5,
     2.0,
@@ -815,95 +1756,219 @@ local function RegisterSettingsPanel()
   scaleValueText:SetPoint("LEFT", slider, "RIGHT", 10, 0)
   scaleValueText:SetText(string.format("%.2f", db.scale))
 
+  local openStyleButton = CreateButton(panel, "Open Style Settings", 20, -420, 220, function()
+    OpenStyleSettings()
+  end)
+  openStyleButton:SetNormalFontObject("GameFontNormal")
+
   ui.scaleSlider = slider
   ui.scaleValueText = scaleValueText
 
-  local glowLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-  glowLabel:SetPoint("TOPLEFT", panel, "TOPLEFT", 16, -392)
-  glowLabel:SetText("Glow Color (RGB)")
+  local stylePanel = CreateFrame("Frame")
+  stylePanel.name = "RecklessTracker Style"
+  stylePanel.parent = "RecklessTracker"
 
-  local redSlider = CreateSlider(
-    panel,
-    "RecklessTrackerGlowRedSlider",
-    20,
-    -418,
-    220,
-    0.0,
-    1.0,
-    0.01,
-    "Glow Red",
-    "0.00",
-    "1.00",
-    function() return db.glowColor.r end,
-    function(value)
-      db.glowColor.r = ClampUnit(value, db.glowColor.r)
-      ApplyGlowColor()
-      if ui.glowValueText then
-        ui.glowValueText:SetText(string.format("R %.2f  G %.2f  B %.2f", db.glowColor.r, db.glowColor.g, db.glowColor.b))
+  local styleTitle = stylePanel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+  styleTitle:SetPoint("TOPLEFT", 16, -16)
+  styleTitle:SetText("RecklessTracker Style")
+
+  local styleSubtitle = stylePanel:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+  styleSubtitle:SetPoint("TOPLEFT", styleTitle, "BOTTOMLEFT", 0, -8)
+  styleSubtitle:SetText("Customize colors, opacity, typography, glow, and profiles.")
+
+  local presetHeader = stylePanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+  presetHeader:SetPoint("TOPLEFT", stylePanel, "TOPLEFT", 16, -42)
+  presetHeader:SetText("Built-in Presets")
+
+  local function RefreshStylePanelControls()
+    for _, refresh in ipairs(styleControlRefreshers) do
+      refresh()
+    end
+    if ui.profileListText then
+      local names = {}
+      for name in pairs(db.styleProfiles) do
+        table.insert(names, name)
+      end
+      table.sort(names)
+      if #names > 0 then
+        ui.profileListText:SetText("Active: " .. tostring(db.activeStylePreset) .. " | Profiles: " .. table.concat(names, ", "))
+      else
+        ui.profileListText:SetText("Active: " .. tostring(db.activeStylePreset) .. " | Profiles: none")
       end
     end
-  )
+  end
 
-  local greenSlider = CreateSlider(
-    panel,
-    "RecklessTrackerGlowGreenSlider",
-    20,
-    -458,
-    220,
-    0.0,
-    1.0,
-    0.01,
-    "Glow Green",
-    "0.00",
-    "1.00",
-    function() return db.glowColor.g end,
+  local function ApplyPresetAndRefresh(name)
+    if ApplyStylePreset(name) then
+      NotifyStyleChanged()
+      RefreshStylePanelControls()
+    end
+  end
+
+  CreateButton(stylePanel, "Classic", 16, -62, 90, function() ApplyPresetAndRefresh("Classic") end)
+  CreateButton(stylePanel, "ElvUI Thin", 112, -62, 100, function() ApplyPresetAndRefresh("ElvUI Thin") end)
+  CreateButton(stylePanel, "High Contrast", 218, -62, 110, function() ApplyPresetAndRefresh("High Contrast") end)
+  CreateButton(stylePanel, "Reset Default", 334, -62, 110, function()
+    db.style = NewDefaultStyle()
+    db.activeStylePreset = "Custom"
+    NotifyStyleChanged()
+    RefreshStylePanelControls()
+  end)
+
+  local profileHeader = stylePanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+  profileHeader:SetPoint("TOPLEFT", stylePanel, "TOPLEFT", 16, -94)
+  profileHeader:SetText("Custom Profile")
+
+  local profileInput = CreateEditBox(stylePanel, 16, -114, 190, 22)
+  profileInput:SetText("")
+
+  CreateButton(stylePanel, "Save", 214, -114, 70, function()
+    local ok, err = SaveStyleProfile(profileInput:GetText())
+    if not ok then
+      Print(err)
+      return
+    end
+    Print("Saved style profile.")
+    RefreshStylePanelControls()
+  end)
+  CreateButton(stylePanel, "Load", 290, -114, 70, function()
+    local ok, err = LoadStyleProfile(profileInput:GetText())
+    if not ok then
+      Print(err)
+      return
+    end
+    NotifyStyleChanged()
+    RefreshStylePanelControls()
+    Print("Loaded style profile.")
+  end)
+  CreateButton(stylePanel, "Delete", 366, -114, 78, function()
+    local ok, err = DeleteStyleProfile(profileInput:GetText())
+    if not ok then
+      Print(err)
+      return
+    end
+    Print("Deleted style profile.")
+    RefreshStylePanelControls()
+  end)
+
+  local profileListText = stylePanel:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+  profileListText:SetPoint("TOPLEFT", stylePanel, "TOPLEFT", 16, -142)
+  profileListText:SetText("Active: " .. tostring(db.activeStylePreset) .. " | Profiles: none")
+  ui.profileListText = profileListText
+
+  CreateColorControl(stylePanel, "Frame Background", 16, -170,
+    function() return db.style.frame.backgroundColor end,
+    function(value) db.style.frame.backgroundColor = value end)
+  CreateColorControl(stylePanel, "Frame Border", 16, -214,
+    function() return db.style.frame.borderColor end,
+    function(value) db.style.frame.borderColor = value end)
+  CreateColorControl(stylePanel, "Cooldown Swipe", 16, -258,
+    function() return db.style.cooldown.swipeColor end,
+    function(value) db.style.cooldown.swipeColor = value end)
+  CreateColorControl(stylePanel, "Glow Color", 16, -302,
+    function() return db.style.glow.color end,
+    function(value) db.style.glow.color = value end)
+  CreateColorControl(stylePanel, "Timer Text", 16, -346,
+    function() return db.style.text.timer.color end,
+    function(value) db.style.text.timer.color = value end)
+  CreateColorControl(stylePanel, "Status READY Text", 16, -390,
+    function() return db.style.text.status.readyColor end,
+    function(value) db.style.text.status.readyColor = value end)
+  CreateColorControl(stylePanel, "Status CD Text", 16, -434,
+    function() return db.style.text.status.cdColor end,
+    function(value) db.style.text.status.cdColor = value end)
+
+  local borderSlider = CreateSlider(
+    stylePanel, nil, 16, -472, 220, 1, 4, 1,
+    "Border Thickness", "1", "4",
+    function() return db.style.frame.borderThickness end,
     function(value)
-      db.glowColor.g = ClampUnit(value, db.glowColor.g)
-      ApplyGlowColor()
-      if ui.glowValueText then
-        ui.glowValueText:SetText(string.format("R %.2f  G %.2f  B %.2f", db.glowColor.r, db.glowColor.g, db.glowColor.b))
-      end
+      db.style.frame.borderThickness = ClampRange(value, 1, 4, db.style.frame.borderThickness)
+      NotifyStyleChanged()
     end
   )
+  table.insert(styleControlRefreshers, function() borderSlider:SetValue(db.style.frame.borderThickness) end)
 
-  local blueSlider = CreateSlider(
-    panel,
-    "RecklessTrackerGlowBlueSlider",
-    20,
-    -498,
-    220,
-    0.0,
-    1.0,
-    0.01,
-    "Glow Blue",
-    "0.00",
-    "1.00",
-    function() return db.glowColor.b end,
+  local insetSlider = CreateSlider(
+    stylePanel, nil, 16, -512, 220, 0, 8, 1,
+    "Icon Inset", "0", "8",
+    function() return db.style.icon.inset end,
     function(value)
-      db.glowColor.b = ClampUnit(value, db.glowColor.b)
-      ApplyGlowColor()
-      if ui.glowValueText then
-        ui.glowValueText:SetText(string.format("R %.2f  G %.2f  B %.2f", db.glowColor.r, db.glowColor.g, db.glowColor.b))
-      end
+      db.style.icon.inset = ClampRange(value, 0, 8, db.style.icon.inset)
+      NotifyStyleChanged()
     end
   )
+  table.insert(styleControlRefreshers, function() insetSlider:SetValue(db.style.icon.inset) end)
 
-  local glowValueText = panel:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-  glowValueText:SetPoint("TOPLEFT", panel, "TOPLEFT", 260, -432)
-  glowValueText:SetText(string.format("R %.2f  G %.2f  B %.2f", db.glowColor.r, db.glowColor.g, db.glowColor.b))
+  local iconAlphaSlider = CreateSlider(
+    stylePanel, nil, 16, -552, 220, 0, 1, 0.01,
+    "Icon Opacity", "0.00", "1.00",
+    function() return db.style.icon.alpha end,
+    function(value)
+      db.style.icon.alpha = ClampUnit(value, db.style.icon.alpha)
+      NotifyStyleChanged()
+    end
+  )
+  table.insert(styleControlRefreshers, function() iconAlphaSlider:SetValue(db.style.icon.alpha) end)
 
-  ui.glowRedSlider = redSlider
-  ui.glowGreenSlider = greenSlider
-  ui.glowBlueSlider = blueSlider
-  ui.glowValueText = glowValueText
+  local timerSizeSlider = CreateSlider(
+    stylePanel, nil, 16, -592, 220, 10, 40, 1,
+    "Timer Font Size", "10", "40",
+    function() return db.style.text.timer.size end,
+    function(value)
+      db.style.text.timer.size = ClampRange(value, 10, 40, db.style.text.timer.size)
+      NotifyStyleChanged()
+    end
+  )
+  table.insert(styleControlRefreshers, function() timerSizeSlider:SetValue(db.style.text.timer.size) end)
+
+  local statusSizeSlider = CreateSlider(
+    stylePanel, nil, 16, -632, 220, 8, 24, 1,
+    "Status Font Size", "8", "24",
+    function() return db.style.text.status.size end,
+    function(value)
+      db.style.text.status.size = ClampRange(value, 8, 24, db.style.text.status.size)
+      NotifyStyleChanged()
+    end
+  )
+  table.insert(styleControlRefreshers, function() statusSizeSlider:SetValue(db.style.text.status.size) end)
+
+  local glowThresholdSlider = CreateSlider(
+    stylePanel, nil, 16, -672, 220, 1, 30, 1,
+    "Glow Threshold (s)", "1", "30",
+    function() return db.style.glow.thresholdSeconds end,
+    function(value)
+      db.style.glow.thresholdSeconds = ClampRange(value, 1, 30, db.style.glow.thresholdSeconds)
+      NotifyStyleChanged()
+    end
+  )
+  table.insert(styleControlRefreshers, function() glowThresholdSlider:SetValue(db.style.glow.thresholdSeconds) end)
+
+  CreateOutlineCycle(stylePanel, "Timer Outline", 260, -472,
+    function() return db.style.text.timer.outline end,
+    function(value) db.style.text.timer.outline = value end)
+  CreateOutlineCycle(stylePanel, "Status Outline", 260, -502,
+    function() return db.style.text.status.outline end,
+    function(value) db.style.text.status.outline = value end)
+
+  stylePanel:SetScript("OnShow", function()
+    EnsureStyleSchema()
+    RefreshStylePanelControls()
+  end)
 
   settingsPanel = panel
+  styleSettingsPanel = stylePanel
   if Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory then
     local category = Settings.RegisterCanvasLayoutCategory(panel, "RecklessTracker")
     Settings.RegisterAddOnCategory(category)
     settingsCategoryID = category:GetID()
+
+    local styleCategory = Settings.RegisterCanvasLayoutCategory(stylePanel, "RecklessTracker Style")
+    Settings.RegisterAddOnCategory(styleCategory)
+    styleSettingsCategoryID = styleCategory:GetID()
   elseif InterfaceOptions_AddCategory then
     InterfaceOptions_AddCategory(panel)
+    InterfaceOptions_AddCategory(stylePanel)
   end
 end
 
@@ -973,19 +2038,17 @@ local function SetGlowColorFromString(value)
     return
   end
 
-  db.glowColor.r = ClampUnit(r, db.glowColor.r)
-  db.glowColor.g = ClampUnit(g, db.glowColor.g)
-  db.glowColor.b = ClampUnit(b, db.glowColor.b)
-  ApplyGlowColor()
-  if ui.glowRedSlider then
-    ui.glowRedSlider:SetValue(db.glowColor.r)
-    ui.glowGreenSlider:SetValue(db.glowColor.g)
-    ui.glowBlueSlider:SetValue(db.glowColor.b)
-  end
-  if ui.glowValueText then
-    ui.glowValueText:SetText(string.format("R %.2f  G %.2f  B %.2f", db.glowColor.r, db.glowColor.g, db.glowColor.b))
-  end
-  Print(string.format("Glow color set to R %.2f G %.2f B %.2f", db.glowColor.r, db.glowColor.g, db.glowColor.b))
+  db.style.glow.color.r = ClampUnit(r, db.style.glow.color.r)
+  db.style.glow.color.g = ClampUnit(g, db.style.glow.color.g)
+  db.style.glow.color.b = ClampUnit(b, db.style.glow.color.b)
+  db.glowColor = db.style.glow.color
+  NotifyStyleChanged()
+  Print(string.format(
+    "Glow color set to R %.2f G %.2f B %.2f",
+    db.style.glow.color.r,
+    db.style.glow.color.g,
+    db.style.glow.color.b
+  ))
 end
 
 local function RegisterSlashCommands()
@@ -1038,9 +2101,9 @@ local function RegisterSlashCommands()
         db.auraSpellID,
         tostring(state.potionSpellID),
         db.scale,
-        db.glowColor.r,
-        db.glowColor.g,
-        db.glowColor.b
+        db.style.glow.color.r,
+        db.style.glow.color.g,
+        db.style.glow.color.b
       ))
       return
     end
@@ -1065,6 +2128,7 @@ local function InitializeDatabase()
   end
   DeepCopyDefaults(defaults, RecklessTrackerDB)
   db = RecklessTrackerDB
+  EnsureStyleSchema()
 end
 
 local function Initialize()
@@ -1085,6 +2149,7 @@ local function Initialize()
   Render()
 
   addon:RegisterEvent("UNIT_AURA")
+  addon:RegisterEvent("BAG_UPDATE")
   addon:RegisterEvent("BAG_UPDATE_COOLDOWN")
   addon:RegisterEvent("SPELL_UPDATE_COOLDOWN")
   addon:RegisterEvent("PLAYER_REGEN_DISABLED")

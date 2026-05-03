@@ -1,6 +1,6 @@
 # RecklessTracker Changelog
 
-## [Unreleased]
+## [v0.1.8] - 2026-05-03
 
 ### Changed
 
@@ -11,12 +11,15 @@
 
 ### Fixed
 
+- Idle-ready tracker icon now stays hidden on characters that do not have the configured potion in their bags.
 - Reduced cooldown overlay darkness by disabling swipe fill (`SetDrawSwipe(false)`) to prevent the icon from looking blacked out.
 - Improved timer readability by moving timer text to a dedicated layer above cooldown and using stronger text styling.
 - Settings panel initialization is wrapped in `pcall` so settings failures do not break slash commands or core tracker startup.
 
 ### Added
 
+- Optional TTS alerts for cooldown ready (`potion ready`) and buff end (`potion ended`), while keeping the 5-second warning on the existing sound path.
+- Per-addon TTS voice selector in the settings panel, with saved voice fallback to WoW's current default voice when the selected voice is unavailable.
 - Test-gated local pipeline:
   - `scripts/run-tests.ps1` (Pester checks for TOC compatibility + startup invariants)
   - `scripts/deploy-live.ps1` (runs tests first, blocks deploy on failure)

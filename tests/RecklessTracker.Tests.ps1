@@ -179,6 +179,126 @@ Describe "RecklessTracker startup hardening" {
     $textIndex | Should BeGreaterThan -1
     $textIndex | Should BeGreaterThan $fontIndex
   }
+
+  It "does not reference removed bootstrap constants in CreateTrackerFrame" {
+    $match = [regex]::Match($script:luaSource, 'local function CreateTrackerFrame\(\)([\s\S]*?)\nend')
+    $match.Success | Should Be $true
+    $block = $match.Value
+    $block | Should Not Match '\bICON_INSET\b'
+    $block | Should Not Match '\bCOOLDOWN_SWIPE_ALPHA\b'
+  }
+}
+
+Describe "RecklessTracker inventory visibility" {
+  BeforeAll {
+    Initialize-TestContext
+  }
+
+  It "checks configured potion bag availability with GetItemCount" {
+    $script:luaSource | Should Match 'local function IsPotionAvailable\(\)[\s\S]*GetItemCount'
+  }
+
+  It "refreshes potion availability before rendering" {
+    $script:luaSource | Should Match 'state\.potionAvailable\s*=\s*IsPotionAvailable\(\)'
+  }
+
+  It "hides idle filtered display when the potion is not in bags" {
+    $match = [regex]::Match($script:luaSource, 'local function Render\(\)([\s\S]*?)\nend')
+    $match.Success | Should Be $true
+    $body = $match.Groups[1].Value
+
+    $body | Should Match 'local hasTrackedState\s*=\s*state\.buffActive\s+or\s+state\.cooldownActive'
+    $body | Should Match 'local showableAvailability\s*=\s*hasTrackedState\s+or\s+state\.potionAvailable'
+    $body | Should Match 'showableAvailability\s+and\s+ShouldShowByFilters\(\)'
+  }
+
+  It "listens for bag updates so the icon appears after acquiring potions" {
+    $script:luaSource | Should Match 'addon:RegisterEvent\("BAG_UPDATE"\)'
+  }
+}
+
+Describe "RecklessTracker TTS alerts" {
+  BeforeAll {
+    Initialize-TestContext
+  }
+
+  It "adds a saved option to use TTS for potion ready and ended alerts" {
+    $script:luaSource | Should Match 'useTts\s*=\s*false'
+  }
+
+  It "exposes a settings checkbox for TTS alerts" {
+    $script:luaSource | Should Match '"Use TTS alerts"'
+    $script:luaSource | Should Match 'db\.alerts\.useTts\s*=\s*v'
+  }
+
+  It "adds a saved option for a per-addon TTS voice selection" {
+    $script:luaSource | Should Match 'ttsVoiceID\s*=\s*nil'
+  }
+
+  It "resolves the saved TTS voice through the discovered voice list and falls back to the default helper" {
+    $match = [regex]::Match($script:luaSource, 'local function ResolveTtsVoiceID\(\)([\s\S]*?)\nend')
+    $match.Success | Should Be $true
+    $body = $match.Groups[1].Value
+
+    $body | Should Match 'db\.alerts\.ttsVoiceID'
+    $body | Should Match 'GetSelectableTtsVoices\(\)'
+    $body | Should Match 'GetDefaultTtsVoiceID\(\)'
+  }
+
+  It "discovers selectable TTS voices from the voice chat API in a stable order" {
+    $match = [regex]::Match($script:luaSource, 'local function GetSelectableTtsVoices\(\)([\s\S]*?)\nend')
+    $match.Success | Should Be $true
+    $body = $match.Groups[1].Value
+
+    $body | Should Match 'if not \(C_VoiceChat and type\(C_VoiceChat\.GetTtsVoices\) == "function"\) then'
+    $body | Should Match 'C_VoiceChat\.GetTtsVoices'
+    $body | Should Match 'table\.sort\(voices'
+    $body | Should Match 'voice\.voiceID'
+    $body | Should Match 'voice\.name'
+    $body | Should Match 'label\s*=\s*"Voice "\s*\.\.\s*voice\.voiceID'
+    $body | Should Match 'label\s*=\s*"WoW default"'
+  }
+
+  It "uses the standard TTS voice option helper" {
+    $script:luaSource | Should Match 'STANDARD_TTS_VOICE_TYPE'
+    $script:luaSource | Should Match 'Enum\.TtsVoiceType\.Standard'
+    $script:luaSource | Should Match 'C_TTSSettings\.GetVoiceOptionID\(STANDARD_TTS_VOICE_TYPE\)'
+  }
+
+  It "guards the TTS voice cycle button against an empty option list" {
+    $match = [regex]::Match($script:luaSource, 'local function CreateTtsVoiceCycleButton\(parent, x, y\)([\s\S]*?)\nend')
+    $match.Success | Should Be $true
+    $body = $match.Groups[1].Value
+
+    $body | Should Match 'if #options == 0 then'
+    $body | Should Match 'SetEnabled\(#options > 1\)'
+    $body | Should Match '"TTS voice:"'
+  }
+
+  It "uses the current mainline SpeakText signature with player TTS settings" {
+    $script:luaSource | Should Match 'local function SpeakTtsAlert\(text\)'
+    $script:luaSource | Should Match 'C_TTSSettings\.GetVoiceOptionID'
+    $script:luaSource | Should Match 'C_TTSSettings\.GetSpeechRate'
+    $script:luaSource | Should Match 'C_TTSSettings\.GetSpeechVolume'
+    $script:luaSource | Should Match 'pcall\(C_VoiceChat\.SpeakText,\s*voiceID,\s*text,\s*rate,\s*volume,\s*true\)'
+  }
+
+  It "routes cooldown ready through the TTS-or-sound alert helper" {
+    $script:luaSource | Should Match 'local function AlertPotionReady\(\)[\s\S]*SpeakTtsAlert\("potion ready"\)[\s\S]*SafePlaySound\(SOUND_COOLDOWN_READY\)'
+    $script:luaSource | Should Match 'TriggerReadyFlash\(\)[\s\S]*AlertPotionReady\(\)'
+  }
+
+  It "announces potion ended when the buff transitions off" {
+    $script:luaSource | Should Match 'local function AlertPotionEnded\(\)[\s\S]*SpeakTtsAlert\("potion ended"\)'
+    $script:luaSource | Should Match 'prevBuffActive\s+and\s+not state\.buffActive[\s\S]*AlertPotionEnded\(\)'
+  }
+
+  It "keeps the 5 second buff warning on the existing sound path" {
+    $warningBlock = [regex]::Match($script:luaSource, 'if state\.buffRemaining <= BUFF_WARNING_SECONDS[\s\S]*?state\.buffWarned = true')
+    $warningBlock.Success | Should Be $true
+    $warningBlock.Value | Should Match 'SafePlaySound\(SOUND_BUFF_WARNING\)'
+    $warningBlock.Value | Should Not Match 'SpeakTtsAlert'
+  }
 }
 
 Describe "RecklessTracker style system" {
