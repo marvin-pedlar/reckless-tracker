@@ -1,10 +1,9 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
-$helperPath = Join-Path $PSScriptRoot "TestContext.ps1"
 
 Describe "RecklessTracker TOC compatibility" {
   BeforeAll {
-    . $helperPath
+    . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
 
@@ -23,7 +22,7 @@ Describe "RecklessTracker TOC compatibility" {
 
 Describe "RecklessTracker startup hardening" {
   BeforeAll {
-    . $helperPath
+    . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
 
@@ -77,7 +76,7 @@ Describe "RecklessTracker startup hardening" {
 
 Describe "RecklessTracker inventory visibility" {
   BeforeAll {
-    . $helperPath
+    . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
 
@@ -106,7 +105,7 @@ Describe "RecklessTracker inventory visibility" {
 
 Describe "RecklessTracker TTS alerts" {
   BeforeAll {
-    . $helperPath
+    . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
 
@@ -191,7 +190,7 @@ Describe "RecklessTracker TTS alerts" {
 
 Describe "RecklessTracker style system" {
   BeforeAll {
-    . $helperPath
+    . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
 
@@ -222,7 +221,7 @@ Describe "RecklessTracker style system" {
 
 Describe "RecklessTracker package isolation" {
   BeforeAll {
-    . $helperPath
+    . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
 

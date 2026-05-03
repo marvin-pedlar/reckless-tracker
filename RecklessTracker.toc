@@ -2,7 +2,7 @@
 ## Title: RecklessTracker
 ## Notes: Tracks Potion of Recklessness duration and cooldown.
 ## Author: tekau + Codex
-## Version: 0.1.10
+## Version: 0.1.11
 ## SavedVariables: RecklessTrackerDB
 
 RecklessTracker\RecklessTracker.lua
