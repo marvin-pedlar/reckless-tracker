@@ -118,10 +118,9 @@ function Initialize-TestContext {
   $script:testContextInitialized = $true
 }
 
+Initialize-TestContext
+
 Describe "RecklessTracker TOC compatibility" {
-  BeforeAll {
-    Initialize-TestContext
-  }
 
   It "has a usable build info source path" {
     (Test-Path -LiteralPath $script:buildInfoPath) | Should Be $true
@@ -137,10 +136,6 @@ Describe "RecklessTracker TOC compatibility" {
 }
 
 Describe "RecklessTracker startup hardening" {
-  BeforeAll {
-    Initialize-TestContext
-  }
-
   It "registers /rt slash commands" {
     $script:luaSource | Should Match 'SLASH_RECKLESSTRACKER1\s*=\s*"/rt"'
     $script:luaSource | Should Match 'SlashCmdList\.RECKLESSTRACKER\s*=\s*function'
@@ -190,10 +185,6 @@ Describe "RecklessTracker startup hardening" {
 }
 
 Describe "RecklessTracker inventory visibility" {
-  BeforeAll {
-    Initialize-TestContext
-  }
-
   It "checks configured potion bag availability with GetItemCount" {
     $script:luaSource | Should Match 'local function IsPotionAvailable\(\)[\s\S]*GetItemCount'
   }
@@ -218,10 +209,6 @@ Describe "RecklessTracker inventory visibility" {
 }
 
 Describe "RecklessTracker TTS alerts" {
-  BeforeAll {
-    Initialize-TestContext
-  }
-
   It "adds a saved option to use TTS for potion ready and ended alerts" {
     $script:luaSource | Should Match 'useTts\s*=\s*false'
   }
@@ -302,10 +289,6 @@ Describe "RecklessTracker TTS alerts" {
 }
 
 Describe "RecklessTracker style system" {
-  BeforeAll {
-    Initialize-TestContext
-  }
-
   It "defines a structured style schema in defaults" {
     $script:luaSource | Should Match 'style\s*=\s*\{'
     $script:luaSource | Should Match 'styleProfiles\s*=\s*\{'
@@ -332,10 +315,6 @@ Describe "RecklessTracker style system" {
 }
 
 Describe "RecklessTracker package isolation" {
-  BeforeAll {
-    Initialize-TestContext
-  }
-
   It "uses package-as to publish only the addon folder name" {
     $script:pkgmetaSource | Should Match 'package-as:\s*RecklessTracker'
   }

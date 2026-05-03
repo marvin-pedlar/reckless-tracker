@@ -1,6 +1,6 @@
 # RecklessTracker Changelog
 
-## [v0.1.8] - 2026-05-03
+## [v0.1.9] - 2026-05-03
 
 ### Changed
 
@@ -15,6 +15,7 @@
 - Reduced cooldown overlay darkness by disabling swipe fill (`SetDrawSwipe(false)`) to prevent the icon from looking blacked out.
 - Improved timer readability by moving timer text to a dedicated layer above cooldown and using stronger text styling.
 - Settings panel initialization is wrapped in `pcall` so settings failures do not break slash commands or core tracker startup.
+- Release verification tests now initialize shared test context eagerly so GitHub's Pester 5 runner resolves the helper correctly during `Describe` execution.
 
 ### Added
 
