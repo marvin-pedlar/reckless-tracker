@@ -1558,7 +1558,8 @@ local function CreateColorControl(parent, label, x, y, getColor, setColor)
   title:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
   title:SetText(label)
 
-  local colorButton = CreateButton(parent, "Pick", x, y - 18, 60, function()
+  local colorButton
+  colorButton = CreateButton(parent, "Pick", x, y - 18, 60, function()
     local color = getColor()
     OpenColorPicker(color, function(r, g, b)
       local updated = getColor()
@@ -1631,7 +1632,8 @@ local function CreateOutlineCycle(parent, label, x, y, getValue, setValue)
 end
 
 local function CreateTtsVoiceCycleButton(parent, x, y)
-  local button = CreateButton(parent, "", x, y, 220, function(self)
+  local buttonWidth = 220
+  local button = CreateButton(parent, "", x, y, buttonWidth, function(self)
     local options = GetSelectableTtsVoices()
     if #options == 0 then
       return
@@ -1649,6 +1651,12 @@ local function CreateTtsVoiceCycleButton(parent, x, y)
     db.alerts.ttsVoiceID = options[nextIndex].id
     self:SetText("TTS voice:" .. " " .. options[nextIndex].label)
   end)
+
+  local label = button:GetFontString()
+  if label then
+    label:SetWidth(buttonWidth - 16)
+    label:SetWordWrap(false)
+  end
 
   local function Refresh()
     local options = GetSelectableTtsVoices()
@@ -1768,16 +1776,24 @@ local function RegisterSettingsPanel()
   stylePanel.name = "RecklessTracker Style"
   stylePanel.parent = "RecklessTracker"
 
-  local styleTitle = stylePanel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+  local styleScroll = CreateFrame("ScrollFrame", "RecklessTrackerStyleScrollFrame", stylePanel, "UIPanelScrollFrameTemplate")
+  styleScroll:SetPoint("TOPLEFT", stylePanel, "TOPLEFT", 4, -4)
+  styleScroll:SetPoint("BOTTOMRIGHT", stylePanel, "BOTTOMRIGHT", -28, 4)
+
+  local styleContent = CreateFrame("Frame", nil, styleScroll)
+  styleContent:SetSize(540, 760)
+  styleScroll:SetScrollChild(styleContent)
+
+  local styleTitle = styleContent:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
   styleTitle:SetPoint("TOPLEFT", 16, -16)
   styleTitle:SetText("RecklessTracker Style")
 
-  local styleSubtitle = stylePanel:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+  local styleSubtitle = styleContent:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   styleSubtitle:SetPoint("TOPLEFT", styleTitle, "BOTTOMLEFT", 0, -8)
   styleSubtitle:SetText("Customize colors, opacity, typography, glow, and profiles.")
 
-  local presetHeader = stylePanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-  presetHeader:SetPoint("TOPLEFT", stylePanel, "TOPLEFT", 16, -42)
+  local presetHeader = styleContent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+  presetHeader:SetPoint("TOPLEFT", styleContent, "TOPLEFT", 16, -58)
   presetHeader:SetText("Built-in Presets")
 
   local function RefreshStylePanelControls()
@@ -1805,24 +1821,24 @@ local function RegisterSettingsPanel()
     end
   end
 
-  CreateButton(stylePanel, "Classic", 16, -62, 90, function() ApplyPresetAndRefresh("Classic") end)
-  CreateButton(stylePanel, "ElvUI Thin", 112, -62, 100, function() ApplyPresetAndRefresh("ElvUI Thin") end)
-  CreateButton(stylePanel, "High Contrast", 218, -62, 110, function() ApplyPresetAndRefresh("High Contrast") end)
-  CreateButton(stylePanel, "Reset Default", 334, -62, 110, function()
+  CreateButton(styleContent, "Classic", 16, -78, 90, function() ApplyPresetAndRefresh("Classic") end)
+  CreateButton(styleContent, "ElvUI Thin", 112, -78, 100, function() ApplyPresetAndRefresh("ElvUI Thin") end)
+  CreateButton(styleContent, "High Contrast", 218, -78, 110, function() ApplyPresetAndRefresh("High Contrast") end)
+  CreateButton(styleContent, "Reset Default", 334, -78, 110, function()
     db.style = NewDefaultStyle()
     db.activeStylePreset = "Custom"
     NotifyStyleChanged()
     RefreshStylePanelControls()
   end)
 
-  local profileHeader = stylePanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-  profileHeader:SetPoint("TOPLEFT", stylePanel, "TOPLEFT", 16, -94)
+  local profileHeader = styleContent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+  profileHeader:SetPoint("TOPLEFT", styleContent, "TOPLEFT", 16, -110)
   profileHeader:SetText("Custom Profile")
 
-  local profileInput = CreateEditBox(stylePanel, 16, -114, 190, 22)
+  local profileInput = CreateEditBox(styleContent, 16, -130, 190, 22)
   profileInput:SetText("")
 
-  CreateButton(stylePanel, "Save", 214, -114, 70, function()
+  CreateButton(styleContent, "Save", 214, -130, 70, function()
     local ok, err = SaveStyleProfile(profileInput:GetText())
     if not ok then
       Print(err)
@@ -1831,7 +1847,7 @@ local function RegisterSettingsPanel()
     Print("Saved style profile.")
     RefreshStylePanelControls()
   end)
-  CreateButton(stylePanel, "Load", 290, -114, 70, function()
+  CreateButton(styleContent, "Load", 290, -130, 70, function()
     local ok, err = LoadStyleProfile(profileInput:GetText())
     if not ok then
       Print(err)
@@ -1841,7 +1857,7 @@ local function RegisterSettingsPanel()
     RefreshStylePanelControls()
     Print("Loaded style profile.")
   end)
-  CreateButton(stylePanel, "Delete", 366, -114, 78, function()
+  CreateButton(styleContent, "Delete", 366, -130, 78, function()
     local ok, err = DeleteStyleProfile(profileInput:GetText())
     if not ok then
       Print(err)
@@ -1851,35 +1867,35 @@ local function RegisterSettingsPanel()
     RefreshStylePanelControls()
   end)
 
-  local profileListText = stylePanel:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-  profileListText:SetPoint("TOPLEFT", stylePanel, "TOPLEFT", 16, -142)
+  local profileListText = styleContent:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+  profileListText:SetPoint("TOPLEFT", styleContent, "TOPLEFT", 16, -158)
   profileListText:SetText("Active: " .. tostring(db.activeStylePreset) .. " | Profiles: none")
   ui.profileListText = profileListText
 
-  CreateColorControl(stylePanel, "Frame Background", 16, -170,
+  CreateColorControl(styleContent, "Frame Background", 16, -186,
     function() return db.style.frame.backgroundColor end,
     function(value) db.style.frame.backgroundColor = value end)
-  CreateColorControl(stylePanel, "Frame Border", 16, -214,
+  CreateColorControl(styleContent, "Frame Border", 16, -230,
     function() return db.style.frame.borderColor end,
     function(value) db.style.frame.borderColor = value end)
-  CreateColorControl(stylePanel, "Cooldown Swipe", 16, -258,
+  CreateColorControl(styleContent, "Cooldown Swipe", 16, -274,
     function() return db.style.cooldown.swipeColor end,
     function(value) db.style.cooldown.swipeColor = value end)
-  CreateColorControl(stylePanel, "Glow Color", 16, -302,
+  CreateColorControl(styleContent, "Glow Color", 16, -318,
     function() return db.style.glow.color end,
     function(value) db.style.glow.color = value end)
-  CreateColorControl(stylePanel, "Timer Text", 16, -346,
+  CreateColorControl(styleContent, "Timer Text", 16, -362,
     function() return db.style.text.timer.color end,
     function(value) db.style.text.timer.color = value end)
-  CreateColorControl(stylePanel, "Status READY Text", 16, -390,
+  CreateColorControl(styleContent, "Status READY Text", 16, -406,
     function() return db.style.text.status.readyColor end,
     function(value) db.style.text.status.readyColor = value end)
-  CreateColorControl(stylePanel, "Status CD Text", 16, -434,
+  CreateColorControl(styleContent, "Status CD Text", 16, -450,
     function() return db.style.text.status.cdColor end,
     function(value) db.style.text.status.cdColor = value end)
 
   local borderSlider = CreateSlider(
-    stylePanel, nil, 16, -472, 220, 1, 4, 1,
+    styleContent, nil, 16, -510, 220, 1, 4, 1,
     "Border Thickness", "1", "4",
     function() return db.style.frame.borderThickness end,
     function(value)
@@ -1890,7 +1906,7 @@ local function RegisterSettingsPanel()
   table.insert(styleControlRefreshers, function() borderSlider:SetValue(db.style.frame.borderThickness) end)
 
   local insetSlider = CreateSlider(
-    stylePanel, nil, 16, -512, 220, 0, 8, 1,
+    styleContent, nil, 16, -550, 220, 0, 8, 1,
     "Icon Inset", "0", "8",
     function() return db.style.icon.inset end,
     function(value)
@@ -1901,7 +1917,7 @@ local function RegisterSettingsPanel()
   table.insert(styleControlRefreshers, function() insetSlider:SetValue(db.style.icon.inset) end)
 
   local iconAlphaSlider = CreateSlider(
-    stylePanel, nil, 16, -552, 220, 0, 1, 0.01,
+    styleContent, nil, 16, -590, 220, 0, 1, 0.01,
     "Icon Opacity", "0.00", "1.00",
     function() return db.style.icon.alpha end,
     function(value)
@@ -1912,7 +1928,7 @@ local function RegisterSettingsPanel()
   table.insert(styleControlRefreshers, function() iconAlphaSlider:SetValue(db.style.icon.alpha) end)
 
   local timerSizeSlider = CreateSlider(
-    stylePanel, nil, 16, -592, 220, 10, 40, 1,
+    styleContent, nil, 16, -630, 220, 10, 40, 1,
     "Timer Font Size", "10", "40",
     function() return db.style.text.timer.size end,
     function(value)
@@ -1923,7 +1939,7 @@ local function RegisterSettingsPanel()
   table.insert(styleControlRefreshers, function() timerSizeSlider:SetValue(db.style.text.timer.size) end)
 
   local statusSizeSlider = CreateSlider(
-    stylePanel, nil, 16, -632, 220, 8, 24, 1,
+    styleContent, nil, 16, -670, 220, 8, 24, 1,
     "Status Font Size", "8", "24",
     function() return db.style.text.status.size end,
     function(value)
@@ -1934,7 +1950,7 @@ local function RegisterSettingsPanel()
   table.insert(styleControlRefreshers, function() statusSizeSlider:SetValue(db.style.text.status.size) end)
 
   local glowThresholdSlider = CreateSlider(
-    stylePanel, nil, 16, -672, 220, 1, 30, 1,
+    styleContent, nil, 16, -710, 220, 1, 30, 1,
     "Glow Threshold (s)", "1", "30",
     function() return db.style.glow.thresholdSeconds end,
     function(value)
@@ -1944,10 +1960,10 @@ local function RegisterSettingsPanel()
   )
   table.insert(styleControlRefreshers, function() glowThresholdSlider:SetValue(db.style.glow.thresholdSeconds) end)
 
-  CreateOutlineCycle(stylePanel, "Timer Outline", 260, -472,
+  CreateOutlineCycle(styleContent, "Timer Outline", 260, -510,
     function() return db.style.text.timer.outline end,
     function(value) db.style.text.timer.outline = value end)
-  CreateOutlineCycle(stylePanel, "Status Outline", 260, -502,
+  CreateOutlineCycle(styleContent, "Status Outline", 260, -540,
     function() return db.style.text.status.outline end,
     function(value) db.style.text.status.outline = value end)
 

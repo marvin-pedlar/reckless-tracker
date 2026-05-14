@@ -1,5 +1,15 @@
 # RecklessTracker Changelog
 
+## [v0.1.12] - 2026-05-14
+
+### Fixed
+
+- Reworked the release verification test suite to use cross-version PowerShell assertions so it passes under both local Pester 3 and GitHub's Pester 5 runners.
+- Realigned addon TOC metadata to the current release version so packaged addon metadata matches the published tag.
+- Style settings color picker no longer crashes with `attempt to index local 'button' (a nil value)` after picking a color. The `Pick` button is now forward-declared so its color-picker callback captures the real local upvalue instead of a nil global.
+- TTS voice button no longer overflows the button border on long voice names (e.g. `Microsoft Zira Desktop - English (United States)`); the label now ellipsizes within the button.
+- Reorganized the Style settings panel: wrapped its controls in a scroll frame so the bottom sliders (Glow Threshold, outline cycles) are reachable, and bumped y-coordinates to clear two layout collisions (subtitle vs `Built-in Presets` header, last `Pick` button vs `Border Thickness` slider).
+
 ## [v0.1.11] - 2026-05-03
 
 ### Changed

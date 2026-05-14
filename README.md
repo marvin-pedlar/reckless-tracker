@@ -8,6 +8,7 @@ RecklessTracker is a World of Warcraft Retail addon that tracks `Potion of Reckl
 - Cooldown display when buff is inactive
 - Optional sound alert at 5s buff remaining
 - Optional READY flash + sound when cooldown finishes
+- Optional TTS alerts for `potion ready` and `potion ended`
 - Visibility filters:
   - In combat / out of combat
   - Open world
@@ -78,6 +79,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\deploy-live.ps1
 - Drinking potion shows buff timer
 - At 5s remaining, warning sound fires once
 - After buff ends, cooldown countdown is shown
+- With TTS alerts enabled, buff end announces `potion ended`
 - At cooldown ready, READY flash and ready sound fire once
+- With TTS alerts enabled, cooldown ready announces `potion ready` instead of the ready sound
 - Combat/content toggles correctly control visibility
 - Frame position and options persist across `/reload`
