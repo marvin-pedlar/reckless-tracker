@@ -1,73 +1,14 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-function Assert-True {
-  param(
-    [Parameter(Mandatory = $true)]
-    [bool]$Condition,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Message
-  )
-
-  if (-not $Condition) {
-    throw $Message
-  }
-}
-
-function Assert-GreaterThan {
-  param(
-    [Parameter(Mandatory = $true)]
-    [double]$Actual,
-
-    [Parameter(Mandatory = $true)]
-    [double]$Threshold,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Message
-  )
-
-  if (-not ($Actual -gt $Threshold)) {
-    throw "$Message (actual: $Actual, threshold: $Threshold)"
-  }
-}
-
-function Assert-Match {
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$Actual,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Pattern,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Message
-  )
-
-  if ($Actual -notmatch $Pattern) {
-    throw "$Message (pattern: $Pattern)"
-  }
-}
-
-function Assert-NotMatch {
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$Actual,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Pattern,
-
-    [Parameter(Mandatory = $true)]
-    [string]$Message
-  )
-
-  if ($Actual -match $Pattern) {
-    throw "$Message (pattern unexpectedly matched: $Pattern)"
-  }
-}
+# Assert-* helpers live in tests/Assertions.ps1 and are dot-sourced from each
+# Describe's BeforeAll. Pester 5 evaluates the file top-level only during
+# Discovery, so top-level function definitions are not visible inside It blocks
+# during the Run phase (this is what broke CI runs through v0.1.11).
 
 Describe "RecklessTracker TOC compatibility" {
   BeforeAll {
+    . (Join-Path $PSScriptRoot "Assertions.ps1")
     . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
@@ -87,6 +28,7 @@ Describe "RecklessTracker TOC compatibility" {
 
 Describe "RecklessTracker startup hardening" {
   BeforeAll {
+    . (Join-Path $PSScriptRoot "Assertions.ps1")
     . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
@@ -141,6 +83,7 @@ Describe "RecklessTracker startup hardening" {
 
 Describe "RecklessTracker inventory visibility" {
   BeforeAll {
+    . (Join-Path $PSScriptRoot "Assertions.ps1")
     . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
@@ -170,6 +113,7 @@ Describe "RecklessTracker inventory visibility" {
 
 Describe "RecklessTracker TTS alerts" {
   BeforeAll {
+    . (Join-Path $PSScriptRoot "Assertions.ps1")
     . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
@@ -265,6 +209,7 @@ Describe "RecklessTracker TTS alerts" {
 
 Describe "RecklessTracker style system" {
   BeforeAll {
+    . (Join-Path $PSScriptRoot "Assertions.ps1")
     . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
@@ -326,6 +271,7 @@ Describe "RecklessTracker style system" {
 
 Describe "RecklessTracker package isolation" {
   BeforeAll {
+    . (Join-Path $PSScriptRoot "Assertions.ps1")
     . (Join-Path $PSScriptRoot "TestContext.ps1")
     Initialize-TestContext
   }
