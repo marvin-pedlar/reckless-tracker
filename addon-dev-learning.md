@@ -34,6 +34,12 @@ This file tracks mistakes made during RecklessTracker development and the concre
 10. Mixed verification/runtime edits in one working tree without explicitly separating push scope at first.
 - Impact: risk of pushing gameplay/runtime changes when user requested CI-only updates.
 
+11. Defined Pester `Assert-*` helper functions at the top of `tests/RecklessTracker.Tests.ps1`. Local Pester 3 ran them fine; GitHub's Pester 5 evaluates top-level code only during Discovery and the helpers are invisible to `It` blocks during Run, so every CI test failed with `CommandNotFoundException`.
+- Impact: every release run from v0.1.8 through the first v0.1.12 attempt failed verify-before-publish for ~32 days, blocking CurseForge uploads.
+
+12. Claimed the v0.1.12 release was shipped before reading the workflow conclusion. Tag pushed, packager run still in flight — verify-before-publish silently failed and no artifact reached CurseForge.
+- Impact: false "released" claim; required force-retag once the Pester 5 issue was fixed.
+
 ## Root Causes
 
 1. No enforced RED->GREEN loop at the beginning.
@@ -42,6 +48,8 @@ This file tracks mistakes made during RecklessTracker development and the concre
 4. Insufficient startup hardening in UI creation path.
 5. No explicit release-verification gate in the workflow checklist.
 6. No explicit selective-staging protocol for partial pushes.
+7. Local Pester 3 hid the Pester 5 Discovery/Run scope split — no parity check between local and CI Pester versions.
+8. Treated `git push origin v<tag>` as the end of "release", instead of "release ends when the workflow logs `Success!`".
 
 ## Non-Negotiable Rules (Future Turns)
 
@@ -54,6 +62,9 @@ This file tracks mistakes made during RecklessTracker development and the concre
 7. Keep fixes minimal and scoped to the proven root cause.
 8. No release claim without a successful tagged release run and log evidence of CurseForge upload success.
 9. When user asks for partial push (for example CI only), stage explicit file paths only, then verify commit file list with `git show --name-only` before push.
+10. Pester helper functions (`Assert-*`, fixtures, etc.) live in `tests/Assertions.ps1` or another file dot-sourced from each `Describe`'s `BeforeAll`. NEVER define them at the top of a `.Tests.ps1` file — Pester 5 will not see them in `It` blocks and every CI test will fail with `CommandNotFoundException`. Local Pester 3.4.0 hides this; the only authoritative check is the CI run.
+11. After `git push origin <tag>`, wait for the Release workflow to complete (`gh run view <id> --json conclusion`). A `success` conclusion plus `Uploading … Success!` in the package-and-publish log are required before claiming the release is done. CurseForge's public Files page can lag by several minutes after `Success!`; that lag is normal and does not warrant re-releasing.
+12. When `verify-before-publish` fails on a tag that produced no artifact, force-retag the same version on the fix commit (`git tag -d v<x.y.z>` → `git push origin :refs/tags/v<x.y.z>` → tag → push). Only bump the version if artifacts already shipped under the failed tag.
 
 ## Current Verification Pipeline
 
