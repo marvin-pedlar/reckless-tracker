@@ -3,7 +3,6 @@ local addon = CreateFrame("Frame")
 
 local TICK_INTERVAL = 0.1
 local BUFF_WARNING_SECONDS = 5
-local GLOW_THRESHOLD_SECONDS = 10
 local TEST_MODE_SECONDS = 20
 local READY_FLASH_SECONDS = 1.5
 local FALLBACK_ICON = 134400

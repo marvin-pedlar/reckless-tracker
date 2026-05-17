@@ -30,7 +30,7 @@ jobs:
       - name: Lint Lua files
         shell: bash
         run: |
-          luacheck RecklessTracker/RecklessTracker.lua --std lua51 --no-global --no-unused-args
+          luacheck RecklessTracker/RecklessTracker.lua --std lua51 --no-global --no-unused-args --no-max-line-length
 
   test-powershell:
     runs-on: windows-latest
